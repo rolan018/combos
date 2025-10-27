@@ -23,11 +23,11 @@
 #include <inttypes.h>
 #include <boost/random/linear_congruential.hpp>
 
-#include "components/types.hpp"
-#include "components/shared.hpp"
-#include "tools/execution_state.hpp"
-#include "rand.hpp"
-#include "tools/thermometer.hpp"
+#include "../components/types.hpp"
+#include "../components/shared.hpp"
+#include "../tools/execution_state.hpp"
+#include "../rand.hpp"
+#include "../tools/thermometer.hpp"
 #include <boost/intrusive/list.hpp>
 
 #define MAX_SHORT_TERM_DEBT 86400

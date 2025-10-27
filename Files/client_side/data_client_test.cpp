@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "data_client.hpp"
-#include "components/shared.hpp"
+#include "../components/shared.hpp"
 #include <simgrid/s4u.hpp>
 #include <string>
 namespace sg4 = simgrid::s4u;

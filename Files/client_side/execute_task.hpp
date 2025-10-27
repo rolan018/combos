@@ -2,7 +2,7 @@
 
 #include <simgrid/s4u.hpp>
 
-#include "components/types.hpp"
+#include "../components/types.hpp"
 
 int client_execute_tasks(ProjectInstanceOnClient *proj);
 

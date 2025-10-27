@@ -1,7 +1,7 @@
 #pragma once
 #include <simgrid/s4u.hpp>
 
-#include "components/types.hpp"
+#include "../components/types.hpp"
 /*
  *	Data client requests function
  */

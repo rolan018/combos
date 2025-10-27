@@ -1,6 +1,6 @@
 #pragma once
 #include "types.hpp"
-#include "tools/thermometer.hpp"
+#include "../tools/thermometer.hpp"
 #include <boost/random/linear_congruential.hpp>
 
 // todo: fix ./generator to set values in this file, not in boinc.cpp

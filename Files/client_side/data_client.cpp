@@ -13,10 +13,10 @@
 #include <inttypes.h>
 #include <boost/random/linear_congruential.hpp>
 
-#include "components/types.hpp"
-#include "components/shared.hpp"
-#include "rand.hpp"
-#include "parameters_struct_from_yaml.hpp"
+#include "../components/types.hpp"
+#include "../components/shared.hpp"
+#include "../rand.hpp"
+#include "../parameters_struct_from_yaml.hpp"
 
 XBT_LOG_NEW_DEFAULT_CATEGORY(data_client, "The logging channel used in data_client");
 

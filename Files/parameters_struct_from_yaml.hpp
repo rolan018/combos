@@ -372,6 +372,8 @@ int g_total_number_ordinary_clients = (g_total_number_clients - g_total_number_d
                     parameters_for_experiment.timeline.execute_state_log_path = timeline["execute_state_log_path"].as<std::string>();
                     // format is "c{cluster_ind}{client_ind},c{cluster_ind}{client_ind}". Cluster's index starts with 1, when client's - with 0.
                     parameters_for_experiment.timeline.observable_clients = split(timeline["observable_clients"].as<std::string>(), ",");
+
+                    std::cout << "config.timeline.execute_state_log_path: " << parameters_for_experiment.timeline.execute_state_log_path << std::endl;
                 }
 
                 if (parameters["seed_for_deterministic_run"])

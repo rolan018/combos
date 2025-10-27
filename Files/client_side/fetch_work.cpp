@@ -4,9 +4,9 @@
 #include <math.h>
 #include <inttypes.h>
 
-#include "components/types.hpp"
-#include "components/shared.hpp"
-#include "rand.hpp"
+#include "../components/types.hpp"
+#include "../components/shared.hpp"
+#include "../rand.hpp"
 
 /**
  * @brief straightforward

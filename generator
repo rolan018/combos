@@ -4,7 +4,7 @@
 
 # Get fields
 
-echo -n "Reading fields from parameters.xml... "
+echo  "Reading fields from parameters.xml..."
 
 simulation_time=($(cat parameters.xml | grep -oP '(?<=simulation_time>)[^<]+'))
 warm_up_time=($(cat parameters.xml | grep -oP '(?<=warm_up_time>)[^<]+'))
@@ -74,6 +74,7 @@ lslatency=($(cat parameters.xml | grep -oP '(?<=lslatency>)[^<]+'))
 ldbw=($(cat parameters.xml | grep -oP '(?<=ldbw>)[^<]+'))
 ldlatency=($(cat parameters.xml | grep -oP '(?<=ldlatency>)[^<]+'))
 
+echo "n_groups: $n_groups"
 echo "Done"
 
 let j=0
@@ -162,7 +163,7 @@ do
 done
 
 echo -n "Creating platform.xml... "
-python3 xml2yaml.py
+python3 python/xml2yaml.py
 
 script_dir=$(dirname "$0")
 script_dir=$(cd "$script_dir" && pwd)

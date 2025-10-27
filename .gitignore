@@ -9,3 +9,5 @@ csv/
 log_save.log
 traces/
 experiments/
+exp/
+results/

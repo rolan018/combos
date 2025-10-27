@@ -1,0 +1,92 @@
+<?xml version='1.0'?>
+<!DOCTYPE platform SYSTEM "https://simgrid.org/simgrid.dtd">
+<platform version="4.1">
+<zone  id="AS0"  routing="Full">
+	<cluster id="cluster_1" prefix="c1" suffix="" radical="0-10"
+		speed="1Gf" bw="50Mbps" lat="7.3ms" router_id="router_cluster1"/>
+	<cluster id="cluster_2" prefix="c2" suffix="" radical="0-100"
+		speed="1Gf" bw="50Mbps" lat="7.3ms" router_id="router_cluster2"/>
+
+	<zone id="BE1" routing="None">
+		<host id="b0" speed="12000000000f"/>
+	</zone>
+	<cluster id="cluster_3" prefix="s1" suffix="" radical="0-1"
+		speed="12000000000f" bw="100Gbps" lat="5ms" router_id="router_cluster3"/>
+
+	<cluster id="cluster_4" prefix="d1" suffix="" radical="0-1"
+		speed="1Gf" bw="100Gbps" lat="5ms" router_id="router_cluster4"/>
+
+	<cluster id="cluster_5" prefix="t1" suffix="" radical="0-1"
+		speed="12000000000f" bw="100Gbps" lat="5ms" router_id="router_cluster5"/>
+
+	<zone id="BE2" routing="None">
+		<host id="b1" speed="12000000000f"/>
+	</zone>
+	<cluster id="cluster_6" prefix="s2" suffix="" radical="0-1"
+		speed="12000000000f" bw="100Gbps" lat="5ms" router_id="router_cluster6"/>
+
+	<cluster id="cluster_7" prefix="d2" suffix="" radical="0-1"
+		speed="1Gf" bw="100Gbps" lat="5ms" router_id="router_cluster7"/>
+
+	<cluster id="cluster_8" prefix="t2" suffix="" radical="0-1"
+		speed="12000000000f" bw="100Gbps" lat="5ms" router_id="router_cluster8"/>
+
+	<zone id="AS1" routing="None">
+		<host id="r0" speed="1f"/>
+	</zone>
+
+	<link id="l0" bandwidth="10Gbps" latency="50us"/>
+	<link id="l1" bandwidth="2Mbps" latency="50us"/>
+	<link id="l2" bandwidth="10Gbps" latency="50us"/>
+	<link id="l3" bandwidth="2Mbps" latency="50us"/>
+	<link id="l4" bandwidth="10Gbps" latency="50us"/>
+	<link id="l5" bandwidth="2Mbps" latency="50us"/>
+	<link id="l6" bandwidth="10Gbps" latency="50us"/>
+	<link id="l7" bandwidth="2Mbps" latency="50us"/>
+	<link id="l8" bandwidth="10Gbps" latency="0"/>
+	<link id="l9" bandwidth="10Gbps" latency="0"/>
+
+	<zoneRoute src="cluster_1" dst="cluster_3" gw_src="router_cluster1" gw_dst="router_cluster3">
+		<link_ctn id="l0"/>
+	</zoneRoute> 
+	<zoneRoute src="cluster_1" dst="cluster_4" gw_src="router_cluster1" gw_dst="router_cluster4">
+		<link_ctn id="l1"/>
+	</zoneRoute> 
+	<zoneRoute src="cluster_1" dst="cluster_5" gw_src="router_cluster1" gw_dst="router_cluster5">
+		<link_ctn id="l0"/>
+	</zoneRoute> 
+	<zoneRoute src="cluster_1" dst="cluster_6" gw_src="router_cluster1" gw_dst="router_cluster6">
+		<link_ctn id="l2"/>
+	</zoneRoute> 
+	<zoneRoute src="cluster_1" dst="cluster_7" gw_src="router_cluster1" gw_dst="router_cluster7">
+		<link_ctn id="l3"/>
+	</zoneRoute> 
+	<zoneRoute src="cluster_1" dst="cluster_8" gw_src="router_cluster1" gw_dst="router_cluster8">
+		<link_ctn id="l2"/>
+	</zoneRoute> 
+	<zoneRoute src="cluster_2" dst="cluster_3" gw_src="router_cluster2" gw_dst="router_cluster3">
+		<link_ctn id="l4"/>
+	</zoneRoute> 
+	<zoneRoute src="cluster_2" dst="cluster_4" gw_src="router_cluster2" gw_dst="router_cluster4">
+		<link_ctn id="l5"/>
+	</zoneRoute> 
+	<zoneRoute src="cluster_2" dst="cluster_5" gw_src="router_cluster2" gw_dst="router_cluster5">
+		<link_ctn id="l4"/>
+	</zoneRoute> 
+	<zoneRoute src="cluster_2" dst="cluster_6" gw_src="router_cluster2" gw_dst="router_cluster6">
+		<link_ctn id="l6"/>
+	</zoneRoute> 
+	<zoneRoute src="cluster_2" dst="cluster_7" gw_src="router_cluster2" gw_dst="router_cluster7">
+		<link_ctn id="l7"/>
+	</zoneRoute> 
+	<zoneRoute src="cluster_2" dst="cluster_8" gw_src="router_cluster2" gw_dst="router_cluster8">
+		<link_ctn id="l6"/>
+	</zoneRoute> 
+	<zoneRoute src="cluster_3" dst="cluster_4" gw_src="router_cluster3" gw_dst="router_cluster4">
+		<link_ctn id="l8"/>
+	</zoneRoute> 
+	<zoneRoute src="cluster_6" dst="cluster_7" gw_src="router_cluster6" gw_dst="router_cluster7">
+		<link_ctn id="l9"/>
+	</zoneRoute> 
+</zone>
+</platform>

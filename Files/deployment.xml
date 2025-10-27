@@ -1,0 +1,619 @@
+<?xml version='1.0'?>
+<!DOCTYPE platform SYSTEM "https://simgrid.org/simgrid.dtd">
+<platform version="4.1">
+   <actor host="r0" function="show_progress" />
+   <actor host="b0" function="init_database"> 
+           <argument value="0"/> 
+           <argument value="RakeSearchtype1e15@home"/> 
+           <argument value="11000"/> 
+           <argument value="736000000000"/> 
+           <argument value="100"/> 
+           <argument value="100"/> 
+           <argument value="1"/> 
+           <argument value="1"/> 
+           <argument value="1"/> 
+           <argument value="8"/> 
+           <argument value="10"/> 
+           <argument value="8"/> 
+           <argument value="64800"/> 
+           <argument value="1024"/> 
+           <argument value="167772160"/> 
+           <argument value="1"/> 
+           <argument value="0"/> 
+           <argument value="1"/> 
+           <argument value="1"/> 
+   </actor> 
+   <actor host="b0" function="work_generator"> 
+           <argument value="0"/> 
+   </actor> 
+   <actor host="b0" function="validator" >
+           <argument value="0"/> 
+   </actor> 
+   <actor host="b0" function="assimilator" >
+           <argument value="0"/> 
+   </actor> 
+   <actor host="s10" function="scheduling_server_requests"> 
+           <argument value="0"/> 
+           <argument value="0"/> 
+   </actor> 
+   <actor host="s10" function="scheduling_server_dispatcher"> 
+           <argument value="0"/> 
+           <argument value="0"/> 
+   </actor> 
+   <actor host="d10" function="data_server_requests"> 
+           <argument value="0"/> 
+   </actor> 
+   <actor host="d10" function="data_server_dispatcher"> 
+           <argument value="0"/> 
+           <argument value="0"/> 
+   </actor> 
+   <actor host="t10" function="data_client_server_requests"> 
+           <argument value="0"/> 
+           <argument value="0"/> 
+   </actor> 
+   <actor host="t10" function="data_client_server_dispatcher"> 
+           <argument value="0"/> 
+           <argument value="0"/> 
+   </actor> 
+   <actor host="b1" function="init_database"> 
+           <argument value="1"/> 
+           <argument value="RakeSearchtype2e13@home"/> 
+           <argument value="11000"/> 
+           <argument value="736000000000"/> 
+           <argument value="100"/> 
+           <argument value="100"/> 
+           <argument value="1"/> 
+           <argument value="1"/> 
+           <argument value="1"/> 
+           <argument value="8"/> 
+           <argument value="10"/> 
+           <argument value="8"/> 
+           <argument value="64800"/> 
+           <argument value="1024"/> 
+           <argument value="167772160"/> 
+           <argument value="1"/> 
+           <argument value="0"/> 
+           <argument value="1"/> 
+           <argument value="1"/> 
+   </actor> 
+   <actor host="b1" function="work_generator"> 
+           <argument value="1"/> 
+   </actor> 
+   <actor host="b1" function="validator" >
+           <argument value="1"/> 
+   </actor> 
+   <actor host="b1" function="assimilator" >
+           <argument value="1"/> 
+   </actor> 
+   <actor host="s20" function="scheduling_server_requests"> 
+           <argument value="1"/> 
+           <argument value="1"/> 
+   </actor> 
+   <actor host="s20" function="scheduling_server_dispatcher"> 
+           <argument value="1"/> 
+           <argument value="1"/> 
+   </actor> 
+   <actor host="d20" function="data_server_requests"> 
+           <argument value="1"/> 
+   </actor> 
+   <actor host="d20" function="data_server_dispatcher"> 
+           <argument value="1"/> 
+           <argument value="1"/> 
+   </actor> 
+   <actor host="t20" function="data_client_server_requests"> 
+           <argument value="1"/> 
+           <argument value="1"/> 
+   </actor> 
+   <actor host="t20" function="data_client_server_dispatcher"> 
+           <argument value="1"/> 
+           <argument value="1"/> 
+   </actor> 
+   <actor host="c10" function="client"> 
+        <argument value="0"/>  
+        <argument value="10"/>  
+        <argument value="9"/>  
+        <argument value="60"/>  
+        <argument value="3600"/>  
+        <argument value="800.000000"/>  
+        <argument value="0.070000"/>  
+        <argument value="5"/>  
+        <argument value="0.053400"/>  
+        <argument value="-1.000000"/>  
+        <argument value="2"/>  
+        <argument value="21.086879"/>  
+        <argument value="159.159719"/>  
+        <argument value="1"/>  
+        <argument value="0.357000"/>  
+        <argument value="43.652000"/>  
+        <argument value="8"/>  
+        <argument value="0.338,0.390,0.272"/>  
+        <argument value="0.029,30.121,1.069"/>  
+        <argument value="1.947681"/>  
+        <argument value="2"/>
+        <argument value="Project1"/>
+        <argument value="0"/>
+        <argument value="10"/>
+        <argument value="98"/>
+        <argument value="84"/>
+        <argument value="Project2"/>
+        <argument value="1"/>
+        <argument value="10"/>
+        <argument value="98"/>
+        <argument value="84"/>
+   </actor> 
+   <actor host="c11" function="client"> 
+        <argument value="0"/>  
+        <argument value="3.195337"/>  
+   </actor> 
+   <actor host="c12" function="client"> 
+        <argument value="0"/>  
+        <argument value="5.550256"/>  
+   </actor> 
+   <actor host="c13" function="client"> 
+        <argument value="0"/>  
+        <argument value="3.037890"/>  
+   </actor> 
+   <actor host="c14" function="client"> 
+        <argument value="0"/>  
+        <argument value="5.177261"/>  
+   </actor> 
+   <actor host="c15" function="client"> 
+        <argument value="0"/>  
+        <argument value="4.156034"/>  
+   </actor> 
+   <actor host="c16" function="client"> 
+        <argument value="0"/>  
+        <argument value="4.576741"/>  
+   </actor> 
+   <actor host="c17" function="client"> 
+        <argument value="0"/>  
+        <argument value="2.594363"/>  
+   </actor> 
+   <actor host="c18" function="client"> 
+        <argument value="0"/>  
+        <argument value="4.117223"/>  
+   </actor> 
+   <actor host="c19" function="data_client_requests"> 
+           <argument value="0"/> 
+           <argument value="0"/> 
+        <argument value="6378515.000000"/>  
+   </actor> 
+   <actor host="c19" function="data_client_dispatcher"> 
+           <argument value="0"/> 
+           <argument value="0"/> 
+   </actor> 
+   <actor host="c20" function="client"> 
+        <argument value="1"/>  
+        <argument value="100"/>  
+        <argument value="99"/>  
+        <argument value="60"/>  
+        <argument value="3600"/>  
+        <argument value="800.000000"/>  
+        <argument value="0.070000"/>  
+        <argument value="5"/>  
+        <argument value="0.053400"/>  
+        <argument value="-1.000000"/>  
+        <argument value="2"/>  
+        <argument value="21.086879"/>  
+        <argument value="159.159719"/>  
+        <argument value="1"/>  
+        <argument value="0.357000"/>  
+        <argument value="43.652000"/>  
+        <argument value="8"/>  
+        <argument value="0.338,0.390,0.272"/>  
+        <argument value="0.029,30.121,1.069"/>  
+        <argument value="1.947681"/>  
+        <argument value="2"/>
+        <argument value="Project1"/>
+        <argument value="0"/>
+        <argument value="10"/>
+        <argument value="98"/>
+        <argument value="84"/>
+        <argument value="Project2"/>
+        <argument value="1"/>
+        <argument value="10"/>
+        <argument value="98"/>
+        <argument value="84"/>
+   </actor> 
+   <actor host="c21" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.195337"/>  
+   </actor> 
+   <actor host="c22" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.550256"/>  
+   </actor> 
+   <actor host="c23" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.037890"/>  
+   </actor> 
+   <actor host="c24" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.177261"/>  
+   </actor> 
+   <actor host="c25" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.156034"/>  
+   </actor> 
+   <actor host="c26" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.576741"/>  
+   </actor> 
+   <actor host="c27" function="client"> 
+        <argument value="1"/>  
+        <argument value="2.594363"/>  
+   </actor> 
+   <actor host="c28" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.117223"/>  
+   </actor> 
+   <actor host="c29" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.550319"/>  
+   </actor> 
+   <actor host="c210" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.789805"/>  
+   </actor> 
+   <actor host="c211" function="client"> 
+        <argument value="1"/>  
+        <argument value="6.734081"/>  
+   </actor> 
+   <actor host="c212" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.069796"/>  
+   </actor> 
+   <actor host="c213" function="client"> 
+        <argument value="1"/>  
+        <argument value="1.554804"/>  
+   </actor> 
+   <actor host="c214" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.990861"/>  
+   </actor> 
+   <actor host="c215" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.641573"/>  
+   </actor> 
+   <actor host="c216" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.113579"/>  
+   </actor> 
+   <actor host="c217" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.743411"/>  
+   </actor> 
+   <actor host="c218" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.737702"/>  
+   </actor> 
+   <actor host="c219" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.278414"/>  
+   </actor> 
+   <actor host="c220" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.929186"/>  
+   </actor> 
+   <actor host="c221" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.016378"/>  
+   </actor> 
+   <actor host="c222" function="client"> 
+        <argument value="1"/>  
+        <argument value="2.949330"/>  
+   </actor> 
+   <actor host="c223" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.040346"/>  
+   </actor> 
+   <actor host="c224" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.384962"/>  
+   </actor> 
+   <actor host="c225" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.823720"/>  
+   </actor> 
+   <actor host="c226" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.167325"/>  
+   </actor> 
+   <actor host="c227" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.188554"/>  
+   </actor> 
+   <actor host="c228" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.537182"/>  
+   </actor> 
+   <actor host="c229" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.100998"/>  
+   </actor> 
+   <actor host="c230" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.643350"/>  
+   </actor> 
+   <actor host="c231" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.811295"/>  
+   </actor> 
+   <actor host="c232" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.764330"/>  
+   </actor> 
+   <actor host="c233" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.977115"/>  
+   </actor> 
+   <actor host="c234" function="client"> 
+        <argument value="1"/>  
+        <argument value="6.120550"/>  
+   </actor> 
+   <actor host="c235" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.599195"/>  
+   </actor> 
+   <actor host="c236" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.960990"/>  
+   </actor> 
+   <actor host="c237" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.611006"/>  
+   </actor> 
+   <actor host="c238" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.828097"/>  
+   </actor> 
+   <actor host="c239" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.712745"/>  
+   </actor> 
+   <actor host="c240" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.226752"/>  
+   </actor> 
+   <actor host="c241" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.842164"/>  
+   </actor> 
+   <actor host="c242" function="client"> 
+        <argument value="1"/>  
+        <argument value="0.922669"/>  
+   </actor> 
+   <actor host="c243" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.547147"/>  
+   </actor> 
+   <actor host="c244" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.018040"/>  
+   </actor> 
+   <actor host="c245" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.301979"/>  
+   </actor> 
+   <actor host="c246" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.023276"/>  
+   </actor> 
+   <actor host="c247" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.347762"/>  
+   </actor> 
+   <actor host="c248" function="client"> 
+        <argument value="1"/>  
+        <argument value="2.107200"/>  
+   </actor> 
+   <actor host="c249" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.730600"/>  
+   </actor> 
+   <actor host="c250" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.115919"/>  
+   </actor> 
+   <actor host="c251" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.788546"/>  
+   </actor> 
+   <actor host="c252" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.471883"/>  
+   </actor> 
+   <actor host="c253" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.732789"/>  
+   </actor> 
+   <actor host="c254" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.652368"/>  
+   </actor> 
+   <actor host="c255" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.222012"/>  
+   </actor> 
+   <actor host="c256" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.059858"/>  
+   </actor> 
+   <actor host="c257" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.596808"/>  
+   </actor> 
+   <actor host="c258" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.249114"/>  
+   </actor> 
+   <actor host="c259" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.376670"/>  
+   </actor> 
+   <actor host="c260" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.260894"/>  
+   </actor> 
+   <actor host="c261" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.932258"/>  
+   </actor> 
+   <actor host="c262" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.463583"/>  
+   </actor> 
+   <actor host="c263" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.485453"/>  
+   </actor> 
+   <actor host="c264" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.182060"/>  
+   </actor> 
+   <actor host="c265" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.509720"/>  
+   </actor> 
+   <actor host="c266" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.276342"/>  
+   </actor> 
+   <actor host="c267" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.108526"/>  
+   </actor> 
+   <actor host="c268" function="client"> 
+        <argument value="1"/>  
+        <argument value="2.908463"/>  
+   </actor> 
+   <actor host="c269" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.590769"/>  
+   </actor> 
+   <actor host="c270" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.373848"/>  
+   </actor> 
+   <actor host="c271" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.292039"/>  
+   </actor> 
+   <actor host="c272" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.023231"/>  
+   </actor> 
+   <actor host="c273" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.272518"/>  
+   </actor> 
+   <actor host="c274" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.318052"/>  
+   </actor> 
+   <actor host="c275" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.849879"/>  
+   </actor> 
+   <actor host="c276" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.223274"/>  
+   </actor> 
+   <actor host="c277" function="client"> 
+        <argument value="1"/>  
+        <argument value="1.895027"/>  
+   </actor> 
+   <actor host="c278" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.411314"/>  
+   </actor> 
+   <actor host="c279" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.084710"/>  
+   </actor> 
+   <actor host="c280" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.213901"/>  
+   </actor> 
+   <actor host="c281" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.575967"/>  
+   </actor> 
+   <actor host="c282" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.517990"/>  
+   </actor> 
+   <actor host="c283" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.907174"/>  
+   </actor> 
+   <actor host="c284" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.879101"/>  
+   </actor> 
+   <actor host="c285" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.976398"/>  
+   </actor> 
+   <actor host="c286" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.045812"/>  
+   </actor> 
+   <actor host="c287" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.417200"/>  
+   </actor> 
+   <actor host="c288" function="client"> 
+        <argument value="1"/>  
+        <argument value="1.000000"/>  
+   </actor> 
+   <actor host="c289" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.051040"/>  
+   </actor> 
+   <actor host="c290" function="client"> 
+        <argument value="1"/>  
+        <argument value="5.304796"/>  
+   </actor> 
+   <actor host="c291" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.945639"/>  
+   </actor> 
+   <actor host="c292" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.349441"/>  
+   </actor> 
+   <actor host="c293" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.342256"/>  
+   </actor> 
+   <actor host="c294" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.407909"/>  
+   </actor> 
+   <actor host="c295" function="client"> 
+        <argument value="1"/>  
+        <argument value="3.846426"/>  
+   </actor> 
+   <actor host="c296" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.752317"/>  
+   </actor> 
+   <actor host="c297" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.077641"/>  
+   </actor> 
+   <actor host="c298" function="client"> 
+        <argument value="1"/>  
+        <argument value="4.420536"/>  
+   </actor> 
+   <actor host="c299" function="data_client_requests"> 
+           <argument value="1"/> 
+           <argument value="1"/> 
+        <argument value="6378515.000000"/>  
+   </actor> 
+   <actor host="c299" function="data_client_dispatcher"> 
+           <argument value="1"/> 
+           <argument value="1"/> 
+   </actor> 
+</platform>
