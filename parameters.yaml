@@ -14,7 +14,7 @@ server_side:
         ifcd_percentage: 100
         averagewpif: 1
         input_file_size: 1024
-        task_fpops: 736000000000
+        task_fpops: 741000000000
         output_file_size: 11000
         min_quorum: 1
         target_nresults: 1
@@ -36,7 +36,7 @@ server_side:
         ifcd_percentage: 100
         averagewpif: 1
         input_file_size: 1024
-        task_fpops: 736000000000
+        task_fpops: 741000000000
         output_file_size: 11000
         min_quorum: 1
         target_nresults: 1
@@ -136,5 +136,5 @@ experiment_run:
         clean_before_write:  true 
         save_filepath:  /mnt/c/Users/rolan/Desktop/Projects/combos/python/configer/save_file.txt 
     timeline:
-        execute_state_log_path:  /mnt/c/Users/rolan/Desktop/Projects/combos/exp/FLOPS_20_1500/execute_800_736000000000.csv 
+        execute_state_log_path:  /mnt/c/Users/rolan/Desktop/Projects/combos/exp/FLOPS_20_1500/execute_800_741000000000.csv 
         observable_clients:  c10,c11,c12,c13,c14,c15,c16,c20,c21,c22,c23,c24,c25,c26 

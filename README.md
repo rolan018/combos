@@ -3,6 +3,37 @@
 # Installation
 You need 
 1. CMake 3.11 or later
+```bash
+sudo apt-get install cmake
+```
+```bash
+cmake --build .
+```
+sudo apt-get install libboost-all-dev
+
+sudo apt-get install build-essential
+
+sudo make install
+
+sudo apt-get install cmake
+
+cmake ..
+
+# go to home folder
+cd
+wget http://downloads.sourceforge.net/project/boost/boost/1.54.0/boost_1_54_0.tar.gz
+tar -zxvf boost_1_54_0.tar.gz
+cd boost_1_54_0
+# get the no of cpucores to make faster
+cpuCores=`cat /proc/cpuinfo | grep "cpu cores" | uniq | awk '{print $NF}'`
+echo "Available CPU cores: "$cpuCores
+./bootstrap.sh  # this will generate ./b2
+sudo ./b2 --with=all -j $cpuCores install
+
+cat /usr/local/include/boost/version.hpp | grep "BOOST_LIB_VERSION"
+
+
+1. CMake 3.11 or later
 2. Boost 1.82, __context__ component
 3. Clone this repository 
 4. Create the directory __build/__ and run "cmake .." from it.

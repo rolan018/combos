@@ -20,11 +20,11 @@ public:
 	{
 		if (params_stream.is_open())
 		{
-			std::cout << "use file for " << use_for_what << ": " << *traces_file << std::endl;
+			std::cout << "use file " << use_for_what << ": " << *traces_file << std::endl;
 		}
 		else
 		{
-			std::cout << "use distribution for " << use_for_what << ": " << std::endl;
+			std::cout << "use distribution " << use_for_what << ": " << std::endl;
 			perror("can't open file");
 		}
 	}

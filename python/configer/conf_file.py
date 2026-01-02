@@ -2,7 +2,7 @@ from pathlib import Path
 from .project import Project
 from .group import Group
 
-experiment_dir = Path(__file__).parent
+experiment_dir = Path(__file__).parent.parent
 
 
 class ConfigurationFile:
@@ -20,7 +20,6 @@ class ConfigurationFile:
     def __getattr__(self, name):
         return self.__dict__.get(name, None)
     def Serialize(self, excute_path=None):
-        log_path = "<execute_state_log_path> " + str(experiment_dir.resolve()) + "/execute_stat_{2}.csv </execute_state_log_path>"
         result = f"""
 <simulation_time>{self.simulation_time or 4}</simulation_time>                <!-- Simulation time in hours  -->
 <warm_up_time>{self.warm_up_time or 0}</warm_up_time>                <!-- Warm up time in hours -->

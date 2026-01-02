@@ -1,3 +1,0 @@
-RakeSearchtype1e15@home project, average task execution (minutes): 3.60949
-RakeSearchtype2e13@home project, average task execution (minutes): 3.67324
-non-availanility period (minutes): 723.136
