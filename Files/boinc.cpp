@@ -1144,7 +1144,7 @@ int main(int argc, char *argv[])
     int j;
     sg4::Engine e(&argc, argv);
     // xbt_log_control_set("data_client.thresh:debug");
-    xbt_log_control_set("data_client.thresh:info");
+    // xbt_log_control_set("ker_engine.thresh:debug");
 
     // MSG_init(&argc, argv);
 
@@ -1346,6 +1346,15 @@ int main(int argc, char *argv[])
         SharedDatabase::_group_info[j].on = 0;
         SharedDatabase::_group_info[j].mutex = sg4::Mutex::create();
         SharedDatabase::_group_info[j].cond = sg4::ConditionVariable::create();
+        
+        for (size_t i = 0; i < config.client_side.groups[j].gprojects.size(); ++i) {
+            GroupProject group_proj;
+            group_proj.lsbw = config.client_side.groups[j].gprojects[i].lsbw;
+            group_proj.lslatency = config.client_side.groups[j].gprojects[i].lslatency;
+            group_proj.ldbw = config.client_side.groups[j].gprojects[i].ldbw;
+            group_proj.ldlatency = config.client_side.groups[j].gprojects[i].ldlatency;
+            SharedDatabase::_group_info[j].gprojects.push_back(group_proj);
+        }
     }
 
     _oclient_mutex = sg4::Mutex::create();
