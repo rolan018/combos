@@ -53,7 +53,7 @@ if(Boost_FOUND)
                    components/data_server.cpp components/shared.cpp
                    components/data_client_server.cpp client_side/data_client.cpp
                    client_side/fetch_work.cpp client_side/execute_task.cpp
-                   tools/execution_state.cpp)
+                   tools/execution_state.cpp tools/speed_converter.cpp)
     target_link_libraries(boinc_sim_cpp ${SIMGRID_LIB_DIR}/libsimgrid.so ${Boost_LIBRARIES} yaml-cpp)
 
     # Add include directories
@@ -62,7 +62,7 @@ target_include_directories(boinc_sim_cpp PRIVATE ${SIMGRID_INCLUDE_DIR})
 add_dependencies(boinc_sim_cpp simgrid_external)
 endif()
 
-add_executable(create_deployment create_deployment.cpp)
+add_executable(create_deployment create_deployment.cpp tools/speed_converter.cpp)
 target_link_libraries(create_deployment yaml-cpp)
 
 add_executable(create_platform create_platform.cpp)

@@ -83,3 +83,9 @@ bool the_same_client_group(const std::string &a, const std::string &b)
 {
     return a[0] == 'd' || b[0] == 'd' || (a[0] == 'c' && b[0] == 'c' && a[1] == b[1]);
 }
+
+int get_client_group(const std::string &a)
+{
+    std::string group = a.substr(1, 1);
+    return std::stoi(group);
+}

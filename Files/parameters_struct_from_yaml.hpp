@@ -24,6 +24,7 @@
 
 #include "yaml-cpp/yaml.h"
 #include <boost/algorithm/string.hpp>
+#include "tools/speed_converter.hpp"
 
 namespace parameters
 {
@@ -69,9 +70,9 @@ namespace parameters
     {
         int pnumber;
         int priority;
-        std::string lsbw;
+        double lsbw;
         std::string lslatency;
-        std::string ldbw;
+        double ldbw;
         std::string ldlatency;
 
         int success_percentage;
@@ -472,9 +473,9 @@ int g_total_number_ordinary_clients = (g_total_number_clients - g_total_number_d
                     GroupProject groupProject;
                     groupProject.pnumber = groupProjectNode["pnumber"].as<int>();
                     groupProject.priority = groupProjectNode["priority"].as<int>();
-                    groupProject.lsbw = groupProjectNode["lsbw"].as<std::string>();
+                    groupProject.lsbw = convertSpeedToBps_NoSpace(groupProjectNode["lsbw"].as<std::string>());
                     groupProject.lslatency = groupProjectNode["lslatency"].as<std::string>();
-                    groupProject.ldbw = groupProjectNode["ldbw"].as<std::string>();
+                    groupProject.ldbw = convertSpeedToBps_NoSpace(groupProjectNode["ldbw"].as<std::string>());
                     groupProject.ldlatency = groupProjectNode["ldlatency"].as<std::string>();
 
                     groupProject.success_percentage = groupProjectNode["success_percentage"].as<int>();

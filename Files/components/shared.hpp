@@ -67,3 +67,5 @@ void delete_completed_communications(sg4::ActivitySet &pending_comms);
 AssignedResult *generate_result(ProjectDatabaseValue &project, WorkunitT *workunit, int X);
 
 bool the_same_client_group(const std::string &a, const std::string &b);
+
+int get_client_group(const std::string &a);

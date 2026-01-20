@@ -490,6 +490,14 @@ struct data_client
     double sum_priority;                     // Sum of project priorities
 };
 
+struct GroupProject
+{
+    double lsbw;
+    std::string lslatency;
+    double ldbw;
+    std::string ldlatency;
+};
+
 /* Client group */
 struct client_group
 {
@@ -522,6 +530,8 @@ struct client_group
     double min_power;             // Minimum host power
 
     int nfinished_oclients;
+
+    std::vector<GroupProject> gprojects;
 };
 
 /* Data client ask for files */

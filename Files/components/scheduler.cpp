@@ -41,9 +41,14 @@ std::vector<AssignedResult *> select_result(int project_number, request_t req)
 
     ProjectDatabaseValue &project = SharedDatabase::_pdatabase[project_number];
 
+    // параметры нужные для будующей модификации балансировщика
+    // client_group &group_info = SharedDatabase::_group_info[project_number];
+    // int client_group = get_client_group(req->host_name);
+    
     std::vector<AssignedResult *> bag_of_result;
     double sum_work = 0;
     double single_result_add_work = (double)project.job_duration / req->power;
+
     std::set<std::string> unique_workunits;
     std::list<AssignedResult *>::iterator current_results_it = project.current_results.begin();
 
@@ -130,6 +135,7 @@ int scheduling_server_requests(int argc, char *argv[])
         std::cerr << "Invalid number of parameter in scheduling_server_requests()" << std::endl;
         return 0;
     }
+
 
     // Init boinc server
     int32_t project_number = (int32_t)atoi(argv[1]);           // Project number
