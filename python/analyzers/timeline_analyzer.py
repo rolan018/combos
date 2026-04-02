@@ -39,23 +39,41 @@ def timeline_analyzer(file_path):
     return idles
 
 
-FL1 = np.arange(20, 120, 20, dtype=int)
-FL2 = np.arange(150, 800, 50, dtype=int)
-FLOPS = np.hstack([FL1, FL2])
-PROP = np.arange(1000000000, 1000000000000, 5000000000, dtype=int)
+def sum_all_statuses(file_path):
+    data = pd.read_csv(file_path)
+    # Вычисляем длительность для каждой строки
+    data['duration'] = data['end'] - data['start']
+
+    # Группируем по клиенту и типу состояния, суммируем длительность
+    result = data.groupby(['client', 'type'])['duration'].sum()
+
+    for (client, state), total_time in result.items():
+        yield (client, state, round(total_time, 1))
 
 
-BASE_DIR = "/mnt/c/Users/rolan/Desktop/Projects/combos/exp"
-dir_output = f"{BASE_DIR}/result_20_800.csv"
+def union_all_statuses(file_path):
+    df = pd.read_csv(file_path)
+    
+    df['diff_client'] = df['client'] != df['client'].shift()
+    df['diff_status'] = df['type'] != df['type'].shift()
+    df['diff_time'] = df['start'] != df['end'].shift()
+    
+    # Флаг начала новой группы
+    df['new_group'] = df[['diff_client', 'diff_status', 'diff_time']].any(axis=1)
+    df['group_id'] = df['new_group'].cumsum()
+    
+    # 3. Агрегируем
+    merged = df.groupby(['group_id', 'client', 'type']).agg(
+        start=('start', 'min'),
+        end=('end', 'max')
+    ).reset_index()
+    
+    # 4. Добавляем duration
+    merged['duration'] = merged['end'] - merged['start']
+    
+    merged = merged[['client', 'type', 'start', 'end', 'duration']]
 
-with open(dir_output, "w") as fout:
-    print(f"flop,prop,c11,c12,c13,c14,c15,c16,c17,c21,c22,c23,c24,c25,c26,c27,norm", file=fout)
-    for flop in FLOPS:
-        for prop in PROP:
-            dir_input = f"{BASE_DIR}/execute_{flop}_{prop}.csv"
-            try:
-                idles = timeline_analyzer(f"{BASE_DIR}/FLOPS_20_1500/execute_{flop}_{prop}.csv")
-                idles = ",".join(list(map(str, idles)))
-                print(f"{flop},{prop},{idles}", file=fout)
-            except FileNotFoundError:
-                print("Not found:", f"execute_{flop}_{prop}.csv")
+    # 5. Возвращаем только нужные колонки
+    for index, row in merged.iterrows():
+        yield row
+    

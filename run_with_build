@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo "Build in '/build' dir"
+cd build
+
+cmake ..
+
+
+echo "Run '/generator'"
+
+cd ..
+
+./generator
+
+echo "Run '/execute'"
+
+./execute

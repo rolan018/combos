@@ -2,8 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-INPUT_DATA = "results/result_100_8500.csv"
-INPUT_DATA = "results/resultTest/FLOPS_quorum_50percent_100_10000/result.csv"
+INPUT_DATA = "exp/FLOPS/min_quorum_3_success_95/result.csv"
 
 df = pd.read_csv(INPUT_DATA)
 
@@ -23,26 +22,26 @@ def add_plot(i, j, ax, df, target, title):
     x_label = "Сложность задач"
     y_label = "Норма вектора ожидания клиентов"
     ax[i, j].plot(df["prop"], df[target], "o")
-    ax[i, j].hlines(y=240, xmin=0, xmax=450000000000, color='green', ls='-')
-    ax[i, j].vlines(x=450000000000, ymin=200, ymax=240, color='green', ls='-')
-    ax[i, j].vlines(x=0, ymin=200, ymax=240, color='green', ls='-')
-    ax[i, j].hlines(y=200, xmin=0, xmax=450000000000, color='green', ls='-')
+    # ax[i, j].hlines(y=240, xmin=0, xmax=450000000000, color='green', ls='-')
+    # ax[i, j].vlines(x=450000000000, ymin=200, ymax=240, color='green', ls='-')
+    # ax[i, j].vlines(x=0, ymin=200, ymax=240, color='green', ls='-')
+    # ax[i, j].hlines(y=200, xmin=0, xmax=450000000000, color='green', ls='-')
     ax[i, j].set_title(title)
     ax[i, j].set_xlabel(x_label)
     ax[i, j].set_ylabel(y_label)
     ax[i, j].legend() 
 
-FLOPS = [100, 250, 500, 1000, 2500, 10000]
-all_items = int(len(FLOPS)/2)
+FLOPS = [100, 400, 1000, 10000, 12000, 15000, 16000, 20000, 40000, 90000]
 
-fig, ax = plt.subplots(nrows=2, ncols=all_items)
+ROWS = 2
+all_items = int(len(FLOPS)/ROWS)
+
+fig, ax = plt.subplots(nrows=ROWS, ncols=all_items)
 
 for i, flop in enumerate(FLOPS):
     j = i%all_items
     df1 = df[df["flop"] == flop]
-    add_plot(i//all_items, j, ax, df1, "norm", f"производительность клиентов {flop} GFLOPS")
-
-    # df1 = df[df["flop"] == flop]
-    # plot_1d(df1, "norm", f"производительность клиентов {flop} GFLOPS")
+    title = f"производительность клиентов {flop} GFLOPS"
+    add_plot(i//all_items, j, ax, df1, "norm", title)
 
 plt.show()

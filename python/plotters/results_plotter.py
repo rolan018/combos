@@ -4,8 +4,7 @@ import numpy as np
 max_speed = "1"
 
 TARGET = "Results success"
-INPUT_DATA = "results/resultSpecialFlops"
-INPUT_DATA = "results/resultTest/FLOPS_quorum_50percent_100_10000"
+INPUT_DATA = "exp/FLOPS/min_quorum_3_success_95"
 
 def add_plot(i, j, ax, df1, num):
     ax[i, j].plot(df1[df1["proj_name"] == "RakeSearchtype2e13@home"]["param"], df1[df1["proj_name"] == "RakeSearchtype2e13@home"][TARGET], 'bo', c='red', label='RakeSearchtype2e13')
@@ -23,8 +22,7 @@ def add_plot(i, j, ax, df1, num):
 
 
 
-FLOPS = [1, 10, 1000, 100000]
-FLOPS = [100, 250, 500, 1000, 2500, 7000]
+FLOPS = [100, 1000, 4000, 10000, 50000, 90000]
 all_items = int(len(FLOPS)/2)
 
 fig, ax = plt.subplots(nrows=2, ncols=all_items)

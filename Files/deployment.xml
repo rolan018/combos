@@ -6,7 +6,7 @@
            <argument value="0"/> 
            <argument value="RakeSearchtype1e15@home"/> 
            <argument value="11000"/> 
-           <argument value="741000000000"/> 
+           <argument value="10000000000"/> 
            <argument value="100"/> 
            <argument value="100"/> 
            <argument value="1"/> 
@@ -59,7 +59,7 @@
            <argument value="1"/> 
            <argument value="RakeSearchtype2e13@home"/> 
            <argument value="11000"/> 
-           <argument value="741000000000"/> 
+           <argument value="10000000000"/> 
            <argument value="100"/> 
            <argument value="100"/> 
            <argument value="1"/> 
@@ -114,8 +114,8 @@
         <argument value="9"/>  
         <argument value="60"/>  
         <argument value="3600"/>  
-        <argument value="800.000000"/>  
-        <argument value="0.070000"/>  
+        <argument value="500.000000"/>  
+        <argument value="450.000000"/>  
         <argument value="5"/>  
         <argument value="0.053400"/>  
         <argument value="-1.000000"/>  
@@ -188,8 +188,8 @@
         <argument value="99"/>  
         <argument value="60"/>  
         <argument value="3600"/>  
-        <argument value="800.000000"/>  
-        <argument value="0.070000"/>  
+        <argument value="500.000000"/>  
+        <argument value="450.000000"/>  
         <argument value="5"/>  
         <argument value="0.053400"/>  
         <argument value="-1.000000"/>  
