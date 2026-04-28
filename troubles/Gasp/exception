@@ -1,0 +1,17 @@
+[c17:Project1:c17
+:(182) 432000.000000] ../simgrid_external/src/kernel/actor/ActorImpl.cpp:263: [root/CRITICAL] Gasp! This exception may be lost by subsequent calls.
+Backtrace (displayed in actor Project1:c17
+):
+  ->  #0 simgrid::s4u::Activity::wait_for(double) at ../simgrid_external/src/s4u/s4u_Activity.cpp:67
+  ->  #1 simgrid::s4u::Activity_T<simgrid::s4u::Exec>::wait() at /mnt/c/Users/rolan/Desktop/Projects/combos/build/simgrid/include/simgrid/s4u/Activity.hpp:325
+  ->  #2 client_execute_tasks(ProjectInstanceOnClient*) at /mnt/c/Users/rolan/Desktop/Projects/combos/Files/client_side/execute_task.cpp:190
+  ->  #3 int std::__invoke_impl<int, int (*&)(ProjectInstanceOnClient*), ProjectInstanceOnClient*&>(std::__invoke_other, int (*&)(ProjectInstanceOnClient*), ProjectInstanceOnClient*&) in ../build/Files/boinc_sim_cpp    
+  ->  #4 std::__invoke_result<int (*&)(ProjectInstanceOnClient*), ProjectInstanceOnClient*&>::type std::__invoke<int (*&)(ProjectInstanceOnClient*), ProjectInstanceOnClient*&>(int (*&)(ProjectInstanceOnClient*), ProjectInstanceOnClient*&) in ../build/Files/boinc_sim_cpp
+  ->  #5 int std::_Bind<int (*(ProjectInstanceOnClient*))(ProjectInstanceOnClient*)>::__call<int, , 0ul>(std::tuple<>&&, std::_Index_tuple<0ul>) in ../build/Files/boinc_sim_cpp
+  ->  #6 int std::_Bind<int (*(ProjectInstanceOnClient*))(ProjectInstanceOnClient*)>::operator()<, int>() in ../build/Files/boinc_sim_cpp
+  ->  #7 int std::__invoke_impl<int, std::_Bind<int (*(ProjectInstanceOnClient*))(ProjectInstanceOnClient*)>&>(std::__invoke_other, std::_Bind<int (*(ProjectInstanceOnClient*))(ProjectInstanceOnClient*)>&) in ../build/Files/boinc_sim_cpp
+  ->  #8 std::enable_if<is_invocable_r_v<void, std::_Bind<int (*(ProjectInstanceOnClient*))(ProjectInstanceOnClient*)>&>, void>::type std::__invoke_r<void, std::_Bind<int (*(ProjectInstanceOnClient*))(ProjectInstanceOnClient*)>&>(std::_Bind<int (*(ProjectInstanceOnClient*))(ProjectInstanceOnClient*)>&) in ../build/Files/boinc_sim_cpp
+  ->  #9 std::_Function_handler<void (), std::_Bind<int (*(ProjectInstanceOnClient*))(ProjectInstanceOnClient*)> >::_M_invoke(std::_Any_data const&) in ../build/Files/boinc_sim_cpp
+  ->  #10 smx_ctx_wrapper at ../simgrid_external/src/kernel/context/ContextSwapped.cpp:43
+
+./execute: line 4:  4086 Aborted                 (core dumped) LD_LIBRARY_PATH="/opt/boost/lib/" ../build/Files/boinc_sim_cpp platform.xml deployment.xml ../parameters.yaml
