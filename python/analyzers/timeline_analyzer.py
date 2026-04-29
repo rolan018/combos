@@ -51,6 +51,29 @@ def sum_all_statuses(file_path):
         yield (client, state, round(total_time, 1))
 
 
+def status_norm_vector(file_path):
+    client_dur = {}
+    client_unav = {}
+    client_idle = {}
+    for value in sum_all_statuses(file_path):
+        if value[1] == "busy:Project1" or value[1] == "busy:Project2":
+            client_dur[value[0]] = round(client_dur.get(value[0], 0) + value[2], 0)
+        if value[1] == "unavailable:":
+            client_unav[value[0]] = value[2]
+        if value[1] == "idle:":
+            client_idle[value[0]] = value[2]
+    sum_of_param = 0
+    i=0
+    for key, value in client_dur.items():
+        var = round(value/(value+client_idle[key])*100, 2)
+        i += 1
+        sum_of_param += var
+        client_dur[key] = var
+    sorted_dict = dict(sorted(client_dur.items(), key=lambda item: item[1]))
+    sorted_keys = list(sorted_dict.keys())
+    return client_dur[sorted_keys[0]], client_dur[sorted_keys[-1]], round(sum_of_param/i, 2)
+
+
 def union_all_statuses(file_path):
     df = pd.read_csv(file_path)
     

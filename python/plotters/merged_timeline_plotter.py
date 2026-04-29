@@ -4,7 +4,7 @@ import matplotlib.patches as mpatches
 import random
 
 BASE_DIR = "/mnt/c/Users/rolan/Desktop/Projects/combos/exp/test/point_runs/utilize_tester"
-dir_input = f"{BASE_DIR}/merged_10x.csv"
+dir_input = f"{BASE_DIR}/merged_timeline.csv"
 
 # 1. Загрузка данных
 df = pd.read_csv(dir_input)
