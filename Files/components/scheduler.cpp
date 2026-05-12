@@ -7,6 +7,7 @@
 
 #include "types.hpp"
 #include "shared.hpp"
+#include "scheduler_batch_cost.hpp"
 
 /**
  * @brief
@@ -47,12 +48,12 @@ std::vector<AssignedResult *> select_result(int project_number, request_t req)
     
     std::vector<AssignedResult *> bag_of_result;
     double sum_work = 0;
-    double single_result_add_work = (double)project.job_duration / req->power;
+    const double per_result_work = single_result_add_work(project, req);
 
     std::set<std::string> unique_workunits;
     std::list<AssignedResult *>::iterator current_results_it = project.current_results.begin();
 
-    while (sum_work + single_result_add_work < req->percentage || sum_work == 0)
+    while (sum_work + per_result_work < req->percentage || sum_work == 0)
     {
 
         // Get result
@@ -101,7 +102,7 @@ std::vector<AssignedResult *> select_result(int project_number, request_t req)
             project.wg_full->notify_all();
         }
 
-        sum_work += single_result_add_work;
+        sum_work += per_result_work;
 
         // Create task
         TaskT *task = new TaskT();
