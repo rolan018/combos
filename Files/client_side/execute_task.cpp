@@ -166,7 +166,6 @@ int client_execute_tasks(ProjectInstanceOnClient *proj)
         // printf("TERMINO POP %s EN %f\n", proj->client->name, sg4::Engine::get_clock());
         // printf("%s Executing task(%s)(%p)\n", proj->client->name, task->name, task);
         proj->client->work_fetch_cond->notify_all();
-        task->running = 1;
         proj->running_task = task;
         /* task finishs its execution, free structures */
 
@@ -174,30 +173,67 @@ int client_execute_tasks(ProjectInstanceOnClient *proj)
 
         // t0 = sg4::Engine::get_clock();
 
-        auto msg_task = task->msg_task;
-
         es::Switcher::switch_to(proj->client->name, es::State::Busy, task->project->name);
         task->last_start_time = sg4::Engine::get_clock();
 
-        msg_task->set_host(sg4::this_actor::get_host());
-        msg_task->start();
-
-        // if (err == MSG_OK)
-        try
+        /* Cooperative completion: do not use msg_task->wait(). Blocking wait() + cancel/suspend from client_main_loop
+         * triggers SimGrid "exception may be lost" / unstable yield paths. Poll with test() and detect preemption when
+         * schedule_job replaces task->msg_task (pointer identity changes). */
+        bool finished_ok = false;
+        for (;;)
         {
-            msg_task->wait();
+            /* schedule_job cancels then assigns a new Exec; until the pointer/state is fresh, task->msg_task may still
+             * be the old CANCELED exec — set_host() then aborts with "Cannot change the host of an exec once it's done". */
+            while (sg4::Engine::get_clock() < maxtt)
+            {
+                const auto st = task->msg_task->get_state();
+                if (st != sg4::Activity::State::CANCELED && st != sg4::Activity::State::FINISHED &&
+                    st != sg4::Activity::State::FAILED)
+                    break;
+                sg4::this_actor::sleep_for(1.0);
+            }
+            if (sg4::Engine::get_clock() >= maxtt)
+                break;
 
+            sg4::ExecPtr cur = task->msg_task;
+            cur->set_host(sg4::this_actor::get_host());
+            cur->start();
+            /* Only after start(): client_main_loop must not see task->running without a STARTED exec (downtime + suspend
+             * on INITED defers kernel suspend to Exec::do_start and can SIGSEGV in ActivityImpl::suspend). */
+            task->running = 1;
+            const void *exec_cookie = cur.get();
+
+            while (sg4::Engine::get_clock() < maxtt)
+            {
+                if (task->msg_task.get() != exec_cookie)
+                    break; /* preempt: new Exec installed by schedule_job */
+                if (task->msg_task->get_state() == sg4::Activity::State::CANCELED)
+                    break;
+                if (task->msg_task->test())
+                {
+                    finished_ok = true;
+                    break;
+                }
+                sg4::this_actor::sleep_for(1.0);
+            }
+
+            if (finished_ok)
+                break;
+            if (sg4::Engine::get_clock() >= maxtt)
+                break;
+            /* else: preempted with new msg_task — outer for restarts start() on the replacement */
+        }
+
+        if (finished_ok)
+        {
             es::Switcher::switch_to(proj->client->name, es::State::Idle);
             task->time_spent_on_execution += sg4::Engine::get_clock() - task->last_start_time;
             g_measure_task_duration_per_project.at(proj->name)->add_to_series(task->time_spent_on_execution);
 
             number = (int32_t)atoi(task->name.c_str());
-            // printf("s%d TERMINO EJECUCION DE %d en %f\n", proj->number, number, sg4::Engine::get_clock());
             proj->number_executed_task.push(task->result_number);
             proj->workunit_executed_task.push(task->workunit);
             proj->total_tasks_executed++;
-            // printf("%f\n", proj->client->workunit_executed_task);
-            // t1 = sg4::Engine::get_clock();
 
             task->running = 0;
             proj->wall_cpu_time += sg4::Engine::get_clock() - proj->client->last_wall;
@@ -213,14 +249,14 @@ int client_execute_tasks(ProjectInstanceOnClient *proj)
             proj->client->sched_cond->notify_all();
             continue;
         }
-        catch (simgrid::CancelException &)
-        {
-        }
 
+        /* Interrupted by maxtt or abandoned mid-preempt without finishing */
         es::Switcher::switch_to(proj->client->name, es::State::Idle);
-        // task->running = 0;
+        task->running = 0;
         proj->running_task = NULL;
-        // free_task(task);
+        free_task(task);
+        delete task;
+        proj->client->sched_cond->notify_all();
         continue;
     }
 
@@ -631,15 +667,18 @@ std::pair<int, int> client_main_loop(client_t client)
 
             sum_unavailable_time += random;
 
-            if (client->running_project)
+            /* Suspend only the execute_tasks actor. Do not call msg_task->suspend() from here — it races the execute
+             * actor (test/sleep_for/start) and crashes in ActivityImpl::suspend (null model_action / bad state). */
+            if (client->running_project && client->running_project->thread &&
+                client->running_project->thread.get() != sg4::Actor::self())
             {
                 client->running_project->thread->suspend();
-                auto &running_task = client->running_project->running_task;
-                if (running_task != nullptr)
-                {
+            }
+            if (client->running_project)
+            {
+                TaskT *running_task = client->running_project->running_task;
+                if (running_task != nullptr && running_task->running)
                     running_task->time_spent_on_execution += sg4::Engine::get_clock() - running_task->last_start_time;
-                    running_task->msg_task->suspend();
-                }
             }
             es::Switcher::switch_to(client->name, es::State::Unavailable);
 
@@ -655,13 +694,11 @@ std::pair<int, int> client_main_loop(client_t client)
             if (client->running_project)
             {
                 es::Switcher::switch_to(client->name, es::State::Busy, client->running_project->name);
-                auto &running_task = client->running_project->running_task;
-                if (running_task != nullptr)
-                {
+                TaskT *running_task = client->running_project->running_task;
+                if (running_task != nullptr && running_task->running)
                     running_task->last_start_time = sg4::Engine::get_clock();
-                    running_task->msg_task->resume();
-                }
-                client->running_project->thread->resume();
+                if (client->running_project->thread && client->running_project->thread.get() != sg4::Actor::self())
+                    client->running_project->thread->resume();
             }
             else
             {
