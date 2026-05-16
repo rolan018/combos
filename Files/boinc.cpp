@@ -998,10 +998,14 @@ int client(int argc, char *argv[])
         {
             proj->thread->kill();
         }
-        SharedDatabase::_group_info[client->group_number].nfinished_oclients++;
-        // printf("%s, Num_clients: %d, Total_clients: %d\n", client->name, num_clients[proj->number], nclients[proj->number]);
-        //  Send finishing message to project_database
-        if (SharedDatabase::_group_info[client->group_number].nfinished_oclients == SharedDatabase::_group_info[client->group_number].n_ordinary_clients)
+    }
+    /* One increment per ordinary client (not per project). Otherwise the "last client"
+     * check fires too early, and TERMINATION is only sent for one project while each
+     * data_client_requests waits for nprojects TERMINATIONs -> deadlock at sim end. */
+    SharedDatabase::_group_info[client->group_number].nfinished_oclients++;
+    if (SharedDatabase::_group_info[client->group_number].nfinished_oclients == SharedDatabase::_group_info[client->group_number].n_ordinary_clients)
+    {
+        for (auto &[key, proj] : client->projects)
         {
             for (int i = 0; i < SharedDatabase::_pdatabase[(int)proj->number].ndata_clients; i++)
             {
