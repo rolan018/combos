@@ -10,10 +10,11 @@
 #include "../components/shared.hpp"
 #include "../rand.hpp"
 
-/** Trace lines prefixed with [c15_fetch] — only when client->name == "c15" (host name from deployment). */
-static inline bool fetch_work_trace_c15(client_t c)
+/** Trace lines prefixed with when client->name == "c15" (host name from deployment). */
+std::string CLIENT_NAME = "c15";
+static inline bool fetch_work_trace(client_t c)
 {
-    return c != nullptr && c->name == "c24";
+    return c != nullptr && c->name == CLIENT_NAME;
 }
 
 /**
@@ -198,10 +199,6 @@ static int client_ask_for_work(client_t client, ProjectInstanceOnClient *proj, d
     */
     ProjectDatabaseValue &project = SharedDatabase::_pdatabase[(int)proj->number]; // Boinc server info pointer
 
-    if (fetch_work_trace_c15(client))
-        std::cout << "[c15_fetch] ask_begin t=" << sg4::Engine::get_clock() << " proj=" << proj->name << " pct=" << percentage
-                  << std::endl;
-
     // msg_error_t error;				// Sending result
     // double backoff = 300;				// 1 minute initial backoff
 
@@ -220,17 +217,8 @@ static int client_ask_for_work(client_t client, ProjectInstanceOnClient *proj, d
 
     sg4::Mailbox::by_name(scheduling_server_mailbox)->put(sswork_request, REQUEST_SIZE);
 
-    const double dbg_get_t0 = sg4::Engine::get_clock();
     // Receive reply from scheduling server
     ResultBag *results_to_execute = sg4::Mailbox::by_name(proj->answer_mailbox)->get<ResultBag>(); // Get work
-
-    const double dbg_get_t1 = sg4::Engine::get_clock();
-    if (fetch_work_trace_c15(client))
-    {
-        std::cout << "[c15_fetch] sched_get_done t=" << dbg_get_t1 << " get_dt=" << (dbg_get_t1 - dbg_get_t0)
-                  << " n=" << results_to_execute->results.size() << " proj=" << proj->name << " pct=" << percentage
-                  << " sched_mb=" << scheduling_server_mailbox << std::endl;
-    }
 
     if (results_to_execute->results.size() == 0)
         proj->on = 0;
@@ -274,19 +262,19 @@ static int client_ask_for_work(client_t client, ProjectInstanceOnClient *proj, d
                     dsinput_file_request->answer_mailbox = proj->answer_mailbox;
 
                     const double c15_ds_t0 = sg4::Engine::get_clock();
-                    if (fetch_work_trace_c15(client))
+                    if (fetch_work_trace(client))
                         std::cout << "[c15_fetch] ds_xfer_begin t=" << c15_ds_t0 << " peer=" << server_with_data << " file_i=" << i
                                   << std::endl;
                     sg4::Mailbox::by_name(server_with_data)->put(dsinput_file_request, KB);
+                    if (fetch_work_trace(client))
+                    {
+                        const double c15_ds_t1 = sg4::Engine::get_clock();
+                        std::cout << "[c15_fetch] ds_xfer_done `put` t=" << c15_ds_t1 << " xfer_dt=" << (c15_ds_t1 - c15_ds_t0)
+                                  << " peer=" << server_with_data << " file_i=" << i << std::endl;
+                    }
 
                     // error = MSG_task_receive_with_timeout(&dsinput_file_reply_task, proj->answer_mailbox, backoff);		// Send input file reply
                     dsmessage_t dsinput_file_reply_task = sg4::Mailbox::by_name(proj->answer_mailbox)->get<s_dsmessage_t>();
-                    if (fetch_work_trace_c15(client))
-                    {
-                        const double c15_ds_t1 = sg4::Engine::get_clock();
-                        std::cout << "[c15_fetch] ds_xfer_done t=" << c15_ds_t1 << " xfer_dt=" << (c15_ds_t1 - c15_ds_t0)
-                                  << " peer=" << server_with_data << " file_i=" << i << std::endl;
-                    }
 
                     // Log request
                     project.rfiles_mutex->lock();
@@ -313,8 +301,6 @@ static int client_ask_for_work(client_t client, ProjectInstanceOnClient *proj, d
         proj->total_tasks_received++;
     }
     // Free
-    if (fetch_work_trace_c15(client))
-        std::cout << "[c15_fetch] ask_leave t=" << sg4::Engine::get_clock() << " proj=" << proj->name << std::endl;
     delete (results_to_execute);
 
     // Signal main client process
@@ -421,16 +407,6 @@ int client_work_fetch(client_t client)
             }
         }
 
-        if (fetch_work_trace_c15(client) && !selected_proj)
-        {
-            std::cout << "[c15_fetch] no_sel t=" << sg4::Engine::get_clock() << " wait_on=" << (were_waiting_on ? 1 : 0)
-                      << " dmiss_n=" << client->deadline_missed.size() << " no_act=" << static_cast<int>(client->no_actions)
-                      << " tot_sf=" << client->total_shortfall;
-            for (auto &[key, p] : projects)
-                std::cout << " |" << p->name << ":on=" << static_cast<int>(p->on) << ",sf=" << p->shortfall << ",ld=" << p->long_debt;
-            std::cout << std::endl;
-        }
-
         if (selected_proj)
         {
             // printf("Selected project(%s) shortfall %lf %d\n", selected_proj->name, selected_proj->shortfall, selected_proj->shortfall > 0);
@@ -445,13 +421,6 @@ FIXME: http://www.boinc-wiki.info/Work-Fetch_Policy */
             {
                 // printf("*************    ASK FOR WORK      %g   %g\n",   work_percentage, sg4::Engine::get_clock());
                 client_ask_for_work(client, selected_proj, work_percentage);
-            }
-            else if (fetch_work_trace_c15(client))
-            {
-                const char *why = !client->deadline_missed.empty() ? "deadline_missed" : "work_pct_0";
-                std::cout << "[c15_fetch] ask_skip t=" << sg4::Engine::get_clock() << " sel=" << selected_proj->name
-                          << " why=" << why << " wp=" << work_percentage << " dmiss_n=" << client->deadline_missed.size()
-                          << std::endl;
             }
         }
         /* workaround to start scheduling tasks at time 0 */
@@ -469,25 +438,6 @@ FIXME: http://www.boinc-wiki.info/Work-Fetch_Policy */
                 break;
 
             std::unique_lock lock(*client->work_fetch_mutex);
-            if (fetch_work_trace_c15(client))
-            {
-                const bool exit1 = (!selected_proj || !client->deadline_missed.empty() || work_percentage == 0);
-                const double now = sg4::Engine::get_clock();
-                std::cout << "[c15_fetch] pre_wait t=" << now << " branch=" << (exit1 ? "exit1" : "exit2")
-                          << " sel=" << (selected_proj ? selected_proj->name : std::string("-"))
-                          << " dmiss_n=" << client->deadline_missed.size() << " wp=" << work_percentage
-                          << " wait_on=" << (were_waiting_on ? 1 : 0);
-                if (exit1 && were_waiting_on)
-                {
-                    const double cap = now + static_cast<double>(project_testing_period);
-                    std::cout << " wake_at=" << std::min(next_project_testing_period, cap);
-                }
-                else if (exit1)
-                    std::cout << " sleep_s=" << WORK_FETCH_PERIOD;
-                else
-                    std::cout << " sleep_s=" << WORK_FETCH_PERIOD;
-                std::cout << std::endl;
-            }
             if (!selected_proj || !client->deadline_missed.empty() || work_percentage == 0)
             {
                 // printf("EXIT 1: remaining %f, time %f\n", max-sg4::Engine::get_clock(), sg4::Engine::get_clock());
