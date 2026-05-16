@@ -48,12 +48,11 @@ std::vector<AssignedResult *> select_result(int project_number, request_t req)
     
     std::vector<AssignedResult *> bag_of_result;
     double sum_work = 0;
-    const double per_result_work = single_result_add_work(project, req);
 
     std::set<std::string> unique_workunits;
     std::list<AssignedResult *>::iterator current_results_it = project.current_results.begin();
 
-    while (sum_work + per_result_work < req->percentage || sum_work == 0)
+    while (true)
     {
 
         // Get result
@@ -83,6 +82,11 @@ std::vector<AssignedResult *> select_result(int project_number, request_t req)
             project.wg_full->notify_all();
             break;
         }
+
+        const double cost = balancer_per_result_work_cost(project, req, *current_results_it);
+        if (balancer_should_stop_batch(sum_work, cost, project, req))
+            break;
+
         result = *current_results_it;
         auto next_it = current_results_it;
         next_it++;
@@ -102,7 +106,7 @@ std::vector<AssignedResult *> select_result(int project_number, request_t req)
             project.wg_full->notify_all();
         }
 
-        sum_work += per_result_work;
+        sum_work += cost;
 
         // Create task
         TaskT *task = new TaskT();
