@@ -1,5 +1,7 @@
 #include "fetch_work.hpp"
+#include <algorithm>
 #include <iostream>
+#include <string>
 #include <simgrid/s4u.hpp>
 #include <math.h>
 #include <inttypes.h>
@@ -7,6 +9,9 @@
 #include "../components/types.hpp"
 #include "../components/shared.hpp"
 #include "../rand.hpp"
+
+/** Trace lines prefixed only when client->name == "c1.." (host name from deployment). */
+std::string CLIENT_PREFIX = "c15";
 
 /**
  * @brief straightforward
@@ -252,7 +257,17 @@ static int client_ask_for_work(client_t client, ProjectInstanceOnClient *proj, d
                     dsinput_file_request->proj_number = proj->number;
                     dsinput_file_request->answer_mailbox = proj->answer_mailbox;
 
+                    const double c15_ds_t0 = sg4::Engine::get_clock();
+                    if (client->name == CLIENT_PREFIX)
+                        std::cout << "[c15_fetch] ds_xfer_begin t=" << c15_ds_t0 << " peer=" << server_with_data << " file_i=" << i
+                                  << std::endl;
                     sg4::Mailbox::by_name(server_with_data)->put(dsinput_file_request, KB);
+                    if (client->name == CLIENT_PREFIX)
+                    {
+                        const double c15_ds_t1 = sg4::Engine::get_clock();
+                        std::cout << "[c15_fetch] ds_xfer_done `put` t=" << c15_ds_t1 << " xfer_dt=" << (c15_ds_t1 - c15_ds_t0)
+                                  << " peer=" << server_with_data << " file_i=" << i << std::endl;
+                    }
 
                     // error = MSG_task_receive_with_timeout(&dsinput_file_reply_task, proj->answer_mailbox, backoff);		// Send input file reply
                     dsmessage_t dsinput_file_reply_task = sg4::Mailbox::by_name(proj->answer_mailbox)->get<s_dsmessage_t>();
@@ -423,6 +438,7 @@ FIXME: http://www.boinc-wiki.info/Work-Fetch_Policy */
             {
                 // printf("EXIT 1: remaining %f, time %f\n", max-sg4::Engine::get_clock(), sg4::Engine::get_clock());
                 // sg4::ConditionVariableimedwait(client->work_fetch_cond, client->work_fetch_mutex, max(0, max-sg4::Engine::get_clock()));
+                const double wait_now = sg4::Engine::get_clock();
                 if (were_waiting_on)
                 {
                     client->work_fetch_cond->wait_until(lock, next_project_testing_period);
