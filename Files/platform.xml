@@ -4,7 +4,7 @@
 <zone  id="AS0"  routing="Full">
 	<cluster id="cluster_1" prefix="c1" suffix="" radical="0-10"
 		speed="1Gf" bw="50Mbps" lat="7.3ms" router_id="router_cluster1"/>
-	<cluster id="cluster_2" prefix="c2" suffix="" radical="0-100"
+	<cluster id="cluster_2" prefix="c2" suffix="" radical="0-20"
 		speed="1Gf" bw="50Mbps" lat="7.3ms" router_id="router_cluster2"/>
 
 	<zone id="BE1" routing="None">
@@ -37,11 +37,11 @@
 
 	<link id="l0" bandwidth="10Gbps" latency="50us"/>
 	<link id="l1" bandwidth="2Mbps" latency="50us"/>
-	<link id="l2" bandwidth="10Gbps" latency="50us"/>
+	<link id="l2" bandwidth="20Gbps" latency="50us"/>
 	<link id="l3" bandwidth="2Mbps" latency="50us"/>
 	<link id="l4" bandwidth="10Gbps" latency="50us"/>
 	<link id="l5" bandwidth="2Mbps" latency="50us"/>
-	<link id="l6" bandwidth="10Gbps" latency="50us"/>
+	<link id="l6" bandwidth="20Gbps" latency="50us"/>
 	<link id="l7" bandwidth="2Mbps" latency="50us"/>
 	<link id="l8" bandwidth="10Gbps" latency="0"/>
 	<link id="l9" bandwidth="10Gbps" latency="0"/>

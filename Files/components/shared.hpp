@@ -69,3 +69,6 @@ AssignedResult *generate_result(ProjectDatabaseValue &project, WorkunitT *workun
 bool the_same_client_group(const std::string &a, const std::string &b);
 
 int get_client_group(const std::string &a);
+
+/** Comma-separated distribution parameters (same format as deployment argv). */
+std::vector<double> parse_distribution_parameter(const std::string &argument);

@@ -1,4 +1,5 @@
 #include "shared.hpp"
+#include <boost/algorithm/string.hpp>
 
 int g_total_number_clients = 1000;
 int g_total_number_data_clients = 100;
@@ -82,6 +83,17 @@ AssignedResult *generate_result(ProjectDatabaseValue &project, WorkunitT *workun
 bool the_same_client_group(const std::string &a, const std::string &b)
 {
     return a[0] == 'd' || b[0] == 'd' || (a[0] == 'c' && b[0] == 'c' && a[1] == b[1]);
+}
+
+std::vector<double> parse_distribution_parameter(const std::string &argument)
+{
+    std::vector<std::string> tokens;
+    boost::split(tokens, argument, boost::is_any_of(","));
+    std::vector<double> result;
+    result.reserve(tokens.size());
+    for (const auto &token : tokens)
+        result.push_back(atof(token.c_str()));
+    return result;
 }
 
 int get_client_group(const std::string &a)

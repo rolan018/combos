@@ -104,6 +104,12 @@ namespace parameters
         int nv_distri;
         std::string na_param;
         std::string nb_param;
+        int dc_av_distri;
+        double dc_aa_param;
+        double dc_ab_param;
+        int dc_nv_distri;
+        std::string dc_na_param;
+        std::string dc_nb_param;
         int att_projs;
         std::vector<GroupProject> gprojects;
     };
@@ -316,6 +322,12 @@ int g_total_number_ordinary_clients = (g_total_number_clients - g_total_number_d
             emitter << YAML::Key << "nv_distri" << YAML::Value << group.nv_distri;
             emitter << YAML::Key << "na_param" << YAML::Value << group.na_param;
             emitter << YAML::Key << "nb_param" << YAML::Value << group.nb_param;
+            emitter << YAML::Key << "dc_av_distri" << YAML::Value << group.dc_av_distri;
+            emitter << YAML::Key << "dc_aa_param" << YAML::Value << group.dc_aa_param;
+            emitter << YAML::Key << "dc_ab_param" << YAML::Value << group.dc_ab_param;
+            emitter << YAML::Key << "dc_nv_distri" << YAML::Value << group.dc_nv_distri;
+            emitter << YAML::Key << "dc_na_param" << YAML::Value << group.dc_na_param;
+            emitter << YAML::Key << "dc_nb_param" << YAML::Value << group.dc_nb_param;
             emitter << YAML::Key << "att_projs" << YAML::Value << group.att_projs;
             emitter << YAML::Key << "gprojects" << YAML::Value << YAML::BeginSeq;
 
@@ -465,8 +477,14 @@ int g_total_number_ordinary_clients = (g_total_number_clients - g_total_number_d
                 group.nv_distri = groupNode["nv_distri"].as<int>();
                 group.na_param = groupNode["na_param"].as<std::string>();
                 group.nb_param = groupNode["nb_param"].as<std::string>();
+                group.dc_av_distri = groupNode["dc_av_distri"].as<int>();
+                group.dc_aa_param = groupNode["dc_aa_param"].as<double>();
+                group.dc_ab_param = groupNode["dc_ab_param"].as<double>();
+                group.dc_nv_distri = groupNode["dc_nv_distri"].as<int>();
+                group.dc_na_param = groupNode["dc_na_param"].as<std::string>();
+                group.dc_nb_param = groupNode["dc_nb_param"].as<std::string>();
                 group.att_projs = groupNode["att_projs"].as<int>();
-
+ 
                 const YAML::Node &gprojectsNode = groupNode["gprojects"];
                 for (const auto &groupProjectNode : gprojectsNode)
                 {

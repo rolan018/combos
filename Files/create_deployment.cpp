@@ -307,6 +307,18 @@ int main(int argc, char *argv[])
 				fprintf(fd, "\n");
 				fprintf(fd, "        <argument value=\"%s\"/>  ", group.nb_param.c_str()); // <!-- B argument -->
 				fprintf(fd, "\n");
+				fprintf(fd, "        <argument value=\"%d\"/>  ", group.dc_av_distri); // <!-- Data-client Av. random distribution -->
+				fprintf(fd, "\n");
+				fprintf(fd, "        <argument value=\"%f\"/>  ", group.dc_aa_param); // <!-- A argument -->
+				fprintf(fd, "\n");
+				fprintf(fd, "        <argument value=\"%f\"/>  ", group.dc_ab_param); // <!-- B argument -->
+				fprintf(fd, "\n");
+				fprintf(fd, "        <argument value=\"%d\"/>  ", group.dc_nv_distri); // <!-- Data-client Nav. random distribution -->
+				fprintf(fd, "\n");
+				fprintf(fd, "        <argument value=\"%s\"/>  ", group.dc_na_param.c_str()); // <!-- A argument -->
+				fprintf(fd, "\n");
+				fprintf(fd, "        <argument value=\"%s\"/>  ", group.dc_nb_param.c_str()); // <!-- B argument -->
+				fprintf(fd, "\n");
 
 				write_trace_parameter(fd, host_power_generator, parameters::no_set_host_power); // <!-- Host power -->
 

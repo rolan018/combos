@@ -1,4 +1,4 @@
-simulation_time: 168
+simulation_time: 72
 warm_up_time: 0
 server_side:
     n_projects: 2
@@ -14,7 +14,7 @@ server_side:
         ifcd_percentage: 100
         averagewpif: 1
         input_file_size: 1024
-        task_fpops: 10000000000
+        task_fpops: 6200000000000
         output_file_size: 11000
         min_quorum: 1
         target_nresults: 1
@@ -36,7 +36,7 @@ server_side:
         ifcd_percentage: 100
         averagewpif: 1
         input_file_size: 1024
-        task_fpops: 10000000000
+        task_fpops: 6200000000000
         output_file_size: 11000
         min_quorum: 1
         target_nresults: 1
@@ -52,13 +52,13 @@ client_side:
     groups:
       - n_clients: 10
         ndata_clients: 1
-        connection_interval: 60
-        scheduling_interval: 3600
+        connection_interval: 10
+        scheduling_interval: 60
         gbw: 50Mbps
         glatency: 7.3ms
         traces_file: /Traces/boom_host_cpu
-        max_speed: 500
-        min_speed: 450
+        max_speed: 10
+        min_speed: 8
         pv_distri: 5
         pa_param: 0.0534
         pb_param: -1
@@ -72,6 +72,12 @@ client_side:
         nv_distri: 8
         na_param: 0.338,0.390,0.272
         nb_param: 0.029,30.121,1.069
+        dc_av_distri: 1
+        dc_aa_param: 0.357
+        dc_ab_param: 43.652
+        dc_nv_distri: 0
+        dc_na_param: 0.338,0.390,0.272
+        dc_nb_param: 0.029,30.121,1.069
         att_projs: 2
         gprojects:
           - pnumber: 0
@@ -84,21 +90,21 @@ client_side:
             canonical_percentage: 84
           - pnumber: 1
             priority: 10
-            lsbw: 10Gbps
+            lsbw: 20Gbps
             lslatency: 50us
             ldbw: 2Mbps
             ldlatency: 50us
             success_percentage: 98
             canonical_percentage: 84
-      - n_clients: 100
+      - n_clients: 20
         ndata_clients: 1
-        connection_interval: 60
-        scheduling_interval: 3600
+        connection_interval: 10
+        scheduling_interval: 60
         gbw: 50Mbps
         glatency: 7.3ms
         traces_file: /Traces/boom_host_cpu
-        max_speed: 500
-        min_speed: 450
+        max_speed: 10
+        min_speed: 8
         pv_distri: 5
         pa_param: 0.0534
         pb_param: -1
@@ -112,6 +118,12 @@ client_side:
         nv_distri: 8
         na_param: 0.338,0.390,0.272
         nb_param: 0.029,30.121,1.069
+        dc_av_distri: 1
+        dc_aa_param: 0.357
+        dc_ab_param: 43.652
+        dc_nv_distri: 8
+        dc_na_param: 0.338,0.390,0.272
+        dc_nb_param: 0.029,30.121,1.069
         att_projs: 2
         gprojects:
           - pnumber: 0
@@ -124,7 +136,7 @@ client_side:
             canonical_percentage: 84
           - pnumber: 1
             priority: 10
-            lsbw: 10Gbps
+            lsbw: 20Gbps
             lslatency: 50us
             ldbw: 2Mbps
             ldlatency: 50us
@@ -137,4 +149,4 @@ experiment_run:
         save_filepath:  /mnt/c/Users/rolan/Desktop/Projects/combos/python/save_file.txt 
     timeline:
         execute_state_log_path:  /mnt/c/Users/rolan/Desktop/Projects/combos/exp/test/point_runs/utilize_tester/execute_10_6000000000000.csv 
-        observable_clients:  c10,c11,c12,c13,c14,c15,c16,c20,c21,c22,c23,c24,c25,c26 
+        observable_clients:  c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c20,c21,c22,c23,c24,c25,c26,c27,c28,c29,c210,c211,c212,c213,c214,c215,c216,c217,c218,c219 

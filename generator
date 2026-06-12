@@ -45,9 +45,6 @@ glatency=($(cat parameters.xml | grep -oP '(?<=glatency>)[^<]+'))
 traces_file=($(cat parameters.xml | grep -oP '(?<=traces_file>)[^<]+'))
 max_speed=($(cat parameters.xml | grep -oP '(?<=max_speed>)[^<]+'))
 min_speed=($(cat parameters.xml | grep -oP '(?<=min_speed>)[^<]+'))
-st_distri=($(cat parameters.xml | grep -oP '(?<=st_distri>)[^<]+'))
-sa_param=($(cat parameters.xml | grep -oP '(?<=sa_param>)[^<]+'))
-sb_param=($(cat parameters.xml | grep -oP '(?<=sb_param>)[^<]+'))
 pv_distri=($(cat parameters.xml | grep -oP '(?<=pv_distri>)[^<]+'))
 pa_param=($(cat parameters.xml | grep -oP '(?<=pa_param>)[^<]+'))
 pb_param=($(cat parameters.xml | grep -oP '(?<=pb_param>)[^<]+'))
@@ -60,12 +57,12 @@ ab_param=($(cat parameters.xml | grep -oP '(?<=ab_param>)[^<]+'))
 nv_distri=($(cat parameters.xml | grep -oP '(?<=nv_distri>)[^<]+'))
 na_param=($(cat parameters.xml | grep -oP '(?<=na_param>)[^<]+'))
 nb_param=($(cat parameters.xml | grep -oP '(?<=nb_param>)[^<]+'))
-xv_distri=($(cat parameters.xml | grep -oP '(?<=xv_distri>)[^<]+'))
-xa_param=($(cat parameters.xml | grep -oP '(?<=xa_param>)[^<]+'))
-xb_param=($(cat parameters.xml | grep -oP '(?<=xb_param>)[^<]+'))
-yv_distri=($(cat parameters.xml | grep -oP '(?<=yv_distri>)[^<]+'))
-ya_param=($(cat parameters.xml | grep -oP '(?<=ya_param>)[^<]+'))
-yb_param=($(cat parameters.xml | grep -oP '(?<=yb_param>)[^<]+'))
+dc_av_distri=($(cat parameters.xml | grep -oP '(?<=dc_av_distri>)[^<]+'))
+dc_aa_param=($(cat parameters.xml | grep -oP '(?<=dc_aa_param>)[^<]+'))
+dc_ab_param=($(cat parameters.xml | grep -oP '(?<=dc_ab_param>)[^<]+'))
+dc_nv_distri=($(cat parameters.xml | grep -oP '(?<=dc_nv_distri>)[^<]+'))
+dc_na_param=($(cat parameters.xml | grep -oP '(?<=dc_na_param>)[^<]+'))
+dc_nb_param=($(cat parameters.xml | grep -oP '(?<=dc_nb_param>)[^<]+'))
 att_projs=($(cat parameters.xml | grep -oP '(?<=att_projs>)[^<]+'))
 pnumber=($(cat parameters.xml | grep -oP '(?<=pnumber>)[^<]+'))
 priority=($(cat parameters.xml | grep -oP '(?<=priority>)[^<]+'))
@@ -232,6 +229,12 @@ do
   arg2[j++]=${nv_distri[$i]}
   arg2[j++]=${na_param[$i]}
   arg2[j++]=${nb_param[$i]}
+  arg2[j++]=${dc_av_distri[$i]}
+  arg2[j++]=${dc_aa_param[$i]}
+  arg2[j++]=${dc_ab_param[$i]}
+  arg2[j++]=${dc_nv_distri[$i]}
+  arg2[j++]=${dc_na_distri[$i]}
+  arg2[j++]=${dc_nb_distri[$i]}
   for((k=0; k<att_projs[i]; k++, l++))
   do
 	arg2[j++]=${pnumber[$l]}

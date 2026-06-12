@@ -278,7 +278,11 @@ int data_client_requests(int argc, char *argv[])
             group_info->cond->wait(lock);
     }
 
-    dclient_info->working.store(uniform_int(1, 2, *g_rndg));
+    const bool dc_always_available = (group_info->dc_nv_distri == 0);
+    if (dc_always_available)
+        dclient_info->working.store(1);
+    else
+        dclient_info->working.store(uniform_int(1, 2, *g_rndg));
     if ((dclient_info->total_storage = parameters::parse_trace_parameter(argv[3])) == -1)
     {
         dclient_info->total_storage = (int32_t)ran_distri(group_info->db_distri, group_info->da_param, group_info->db_param, *g_rndg_for_disk_cap);
@@ -310,30 +314,31 @@ int data_client_requests(int argc, char *argv[])
 
     while (1)
     {
-
-        // Available
-        if (dclient_info->working.load() == 2)
+        if (!dc_always_available)
         {
-            dclient_info->working.store(1);
-            random = (ran_distri(group_info->av_distri, group_info->aa_param, group_info->ab_param, *g_rndg_for_data_client_avail) * 3600.0);
-            if (ceil(random + sg4::Engine::get_clock() >= maxtt))
-                random = (double)std::max(maxtt - sg4::Engine::get_clock(), 0.0);
-            time = sg4::Engine::get_clock() + random;
-        }
+            // Available
+            if (dclient_info->working.load() == 2)
+            {
+                dclient_info->working.store(1);
+                random = (ran_distri(group_info->dc_av_distri, group_info->dc_aa_param, group_info->dc_ab_param, *g_rndg_for_data_client_avail) * 3600.0);
+                if (ceil(random + sg4::Engine::get_clock() >= maxtt))
+                    random = (double)std::max(maxtt - sg4::Engine::get_clock(), 0.0);
+                time = sg4::Engine::get_clock() + random;
+            }
 
-        // Non available
-        if (dclient_info->working.load() == 1 && ceil(sg4::Engine::get_clock()) >= time)
-        {
-            random = (ran_distri(group_info->nv_distri, group_info->na_param, group_info->nb_param, *g_rndg_for_data_client_avail) * 3600.0);
-            if (ceil(random + sg4::Engine::get_clock() >= maxtt))
-                random = (double)std::max(maxtt - sg4::Engine::get_clock(), 0.0);
-            if (random > 0)
-                dclient_info->working.store(0);
-            dclient_info->navailable += random;
-            sg4::this_actor::sleep_for(random);
-            dclient_info->working.store(2);
+            // Non available
+            if (dclient_info->working.load() == 1 && ceil(sg4::Engine::get_clock()) >= time)
+            {
+                random = (ran_distri(group_info->dc_nv_distri, group_info->dc_na_param, group_info->dc_nb_param, *g_rndg_for_data_client_avail) * 3600.0);
+                if (ceil(random + sg4::Engine::get_clock() >= maxtt))
+                    random = (double)std::max(maxtt - sg4::Engine::get_clock(), 0.0);
+                if (random > 0)
+                    dclient_info->working.store(0);
+                dclient_info->navailable += random;
+                sg4::this_actor::sleep_for(random);
+                dclient_info->working.store(2);
+            }
         }
-
         // Receive message
         dsmessage_t msg = self_mailbox->get<dsmessage>();
 

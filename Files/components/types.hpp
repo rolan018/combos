@@ -526,6 +526,12 @@ struct client_group
     std::vector<double> ab_param; // Availability B parameter
     std::vector<double> na_param; // Non availability A parameter
     std::vector<double> nb_param; // Non availability B parameter
+    char dc_av_distri;            // Data-client availability distribution (from parameters.yaml)
+    char dc_nv_distri;            // Data-client non-availability distribution
+    std::vector<double> dc_aa_param;
+    std::vector<double> dc_ab_param;
+    std::vector<double> dc_na_param;
+    std::vector<double> dc_nb_param;
     double max_power;             // Maximum host power
     double min_power;             // Minimum host power
 

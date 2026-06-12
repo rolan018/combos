@@ -810,17 +810,7 @@ static void client_initialize_projects(client_t client, int argc, char **argv)
 #include <boost/algorithm/string.hpp>
 std::vector<double> get_distribution_parameter(char *argument)
 {
-    std::string str = argument;
-    std::vector<std::string> tokens;
-
-    boost::split(tokens, str, boost::is_any_of(","));
-    std::vector<double> result;
-    result.reserve(tokens.size());
-    for (auto token : tokens)
-    {
-        result.push_back(atof(token.data()));
-    }
-    return result;
+    return parse_distribution_parameter(std::string(argument));
 }
 
 static client_t client_new(int argc, char *argv[])
@@ -858,6 +848,25 @@ static client_t client_new(int argc, char *argv[])
         SharedDatabase::_group_info[group_number].nv_distri = (char)atoi(argv[index++]);
         SharedDatabase::_group_info[group_number].na_param = get_distribution_parameter(argv[index++]);
         SharedDatabase::_group_info[group_number].nb_param = get_distribution_parameter(argv[index++]);
+        client_group &g = SharedDatabase::_group_info[group_number];
+        if (argc - index > 6)
+        {
+            g.dc_av_distri = (char)atoi(argv[index++]);
+            g.dc_aa_param = get_distribution_parameter(argv[index++]);
+            g.dc_ab_param = get_distribution_parameter(argv[index++]);
+            g.dc_nv_distri = (char)atoi(argv[index++]);
+            g.dc_na_param = get_distribution_parameter(argv[index++]);
+            g.dc_nb_param = get_distribution_parameter(argv[index++]);
+        }
+        else
+        {
+            g.dc_av_distri = g.av_distri;
+            g.dc_nv_distri = g.nv_distri;
+            g.dc_aa_param = g.aa_param;
+            g.dc_ab_param = g.ab_param;
+            g.dc_na_param = g.na_param;
+            g.dc_nb_param = g.nb_param;
+        }
 
         aux = parameters::parse_trace_parameter(argv[index++]);
 

@@ -11,7 +11,7 @@
 #include "../rand.hpp"
 
 /** Trace lines prefixed only when client->name == "c1.." (host name from deployment). */
-std::string CLIENT_PREFIX = "c15";
+std::string CLIENT_PREFIX = "c27";
 
 /**
  * @brief straightforward
@@ -257,15 +257,15 @@ static int client_ask_for_work(client_t client, ProjectInstanceOnClient *proj, d
                     dsinput_file_request->proj_number = proj->number;
                     dsinput_file_request->answer_mailbox = proj->answer_mailbox;
 
-                    const double c15_ds_t0 = sg4::Engine::get_clock();
+                    const double c_ds_t0 = sg4::Engine::get_clock();
                     if (client->name == CLIENT_PREFIX)
-                        std::cout << "[c15_fetch] ds_xfer_begin t=" << c15_ds_t0 << " peer=" << server_with_data << " file_i=" << i
+                        std::cout << "[" << client->name << "_fetch] ds_xfer_begin t=" << c_ds_t0 << " peer=" << server_with_data << " file_i=" << i
                                   << std::endl;
                     sg4::Mailbox::by_name(server_with_data)->put(dsinput_file_request, KB);
                     if (client->name == CLIENT_PREFIX)
                     {
-                        const double c15_ds_t1 = sg4::Engine::get_clock();
-                        std::cout << "[c15_fetch] ds_xfer_done `put` t=" << c15_ds_t1 << " xfer_dt=" << (c15_ds_t1 - c15_ds_t0)
+                        const double c_ds_t1 = sg4::Engine::get_clock();
+                        std::cout << "[" << client->name << "_fetch] ds_xfer_done `put` t=" << c_ds_t1 << " xfer_dt=" << (c_ds_t1 - c_ds_t0)
                                   << " peer=" << server_with_data << " file_i=" << i << std::endl;
                     }
 
