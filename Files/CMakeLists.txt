@@ -50,7 +50,8 @@ if(Boost_FOUND)
 
     # Todo: if possible, how can I split it
     add_executable(boinc_sim_cpp boinc.cpp components/scheduler.cpp
-                   components/scheduler_batch_cost.cpp
+                   components/scheduler_batch_cost.cpp components/scheduler_matching.cpp
+                   components/scheduler_group_aware.cpp components/scheduler_balancer_state.cpp
                    components/data_server.cpp components/shared.cpp
                    components/data_client_server.cpp client_side/data_client.cpp
                    client_side/fetch_work.cpp client_side/execute_task.cpp

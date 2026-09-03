@@ -1,4 +1,7 @@
 #include "shared.hpp"
+
+#include <cinttypes>
+#include <cstdio>
 #include <boost/algorithm/string.hpp>
 
 int g_total_number_clients = 1000;
@@ -26,6 +29,26 @@ std::unique_ptr<boost::rand48> g_rndg_for_client_avail = nullptr;
 
 std::unordered_map<std::string, thermometer::Measure<double> *> g_measure_task_duration_per_project = {};
 thermometer::Measure<double> *g_measure_non_availability_duration = nullptr;
+
+bool g_balancer_feedback_enabled = true;
+bool g_min_min_scheduler_enabled = false;
+SchedulerMatchingStats g_scheduler_matching_stats;
+
+void scheduler_matching_stats_reset()
+{
+    g_scheduler_matching_stats = {};
+}
+
+void scheduler_matching_stats_print()
+{
+    const SchedulerMatchingStats &s = g_scheduler_matching_stats;
+    printf("  Scheduler MCT picks: \t\t%'" PRId64 "\n", s.mct_picks);
+    printf("  Scheduler MCT != FIFO: \t%'" PRId64 " (%0.1f%% of picks)\n", s.mct_differs_from_fifo,
+           s.mct_picks > 0 ? 100.0 * static_cast<double>(s.mct_differs_from_fifo) / static_cast<double>(s.mct_picks)
+                           : 0.0);
+    printf("  Scheduler Min-Min batches: \t%'" PRId64 " (>=2 clients)\n", s.minmin_multi_client_batches);
+    printf("  Scheduler Min-Min assigns: \t%'" PRId64 "\n\n", s.minmin_assignments);
+}
 
 /*
  *	 Server compute simulation. Wait till the end of a executing task

@@ -39,6 +39,24 @@ extern std::unique_ptr<boost::rand48> g_rndg_for_client_avail;
 extern std::unordered_map<std::string, thermometer::Measure<double> *> g_measure_task_duration_per_project;
 extern thermometer::Measure<double> *g_measure_non_availability_duration;
 
+/** When false, scheduler uses static per-task cost (legacy) with no bootstrap or EMA feedback. */
+extern bool g_balancer_feedback_enabled;
+/** When false, scheduling server uses FIFO result selection (legacy). When true, MCT / Min-Min. */
+extern bool g_min_min_scheduler_enabled;
+
+struct SchedulerMatchingStats
+{
+    int64_t mct_picks = 0;
+    int64_t mct_differs_from_fifo = 0;
+    int64_t minmin_multi_client_batches = 0;
+    int64_t minmin_assignments = 0;
+};
+
+extern SchedulerMatchingStats g_scheduler_matching_stats;
+
+void scheduler_matching_stats_reset();
+void scheduler_matching_stats_print();
+
 class SharedDatabase
 {
 public:

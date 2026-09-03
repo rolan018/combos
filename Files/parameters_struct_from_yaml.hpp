@@ -16,6 +16,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -131,6 +132,15 @@ namespace parameters
         bool clean_before_write;
         std::string save_filepath;
     };
+
+    struct BalancerConfig
+    {
+        bool enabled = true;
+        bool min_min_enabled = false;
+        bool group_aware_matching_enabled = false;
+        double bootstrap_duration_hours = 6.0;
+    };
+
     struct Timeline
     {
         std::string execute_state_log_path;
@@ -142,6 +152,7 @@ namespace parameters
         std::optional<uint64_t> seed_for_deterministic_run;
         Timeline timeline;
         Measures measures;
+        BalancerConfig balancer;
     };
 
     struct Config
@@ -241,6 +252,18 @@ int g_total_number_ordinary_clients = (g_total_number_clients - g_total_number_d
                 emitter << YAML::BeginMap;
                 emitter << YAML::Key << "clean_before_write" << YAML::Value << parameters_for_experiment.measures.clean_before_write;
                 emitter << YAML::Key << "save_filepath" << YAML::Value << parameters_for_experiment.measures.save_filepath;
+                emitter << YAML::EndMap;
+            }
+
+            {
+                emitter << YAML::Key << "balancer";
+                emitter << YAML::BeginMap;
+                emitter << YAML::Key << "enabled" << YAML::Value << parameters_for_experiment.balancer.enabled;
+                emitter << YAML::Key << "min_min_enabled" << YAML::Value << parameters_for_experiment.balancer.min_min_enabled;
+                emitter << YAML::Key << "group_aware_matching_enabled" << YAML::Value
+                        << parameters_for_experiment.balancer.group_aware_matching_enabled;
+                emitter << YAML::Key << "bootstrap_duration_hours" << YAML::Value
+                        << parameters_for_experiment.balancer.bootstrap_duration_hours;
                 emitter << YAML::EndMap;
             }
             emitter << YAML::EndMap;
@@ -403,6 +426,31 @@ int g_total_number_ordinary_clients = (g_total_number_clients - g_total_number_d
                     std::cout << "config.measures.clean_before_write: " << parameters_for_experiment.measures.clean_before_write << std::endl;
                     std::cout << "config.measures.save_filepath: " << parameters_for_experiment.measures.save_filepath << std::endl;
                 }
+
+                if (parameters["balancer"])
+                {
+                    const YAML::Node &balancer = parameters["balancer"];
+                    if (balancer["enabled"].IsDefined())
+                        parameters_for_experiment.balancer.enabled = balancer["enabled"].as<bool>();
+                    if (balancer["min_min_enabled"].IsDefined())
+                        parameters_for_experiment.balancer.min_min_enabled = balancer["min_min_enabled"].as<bool>();
+                    if (balancer["group_aware_matching_enabled"].IsDefined())
+                        parameters_for_experiment.balancer.group_aware_matching_enabled =
+                            balancer["group_aware_matching_enabled"].as<bool>();
+                    else if (balancer["group_aware_matching"].IsDefined())
+                        parameters_for_experiment.balancer.group_aware_matching_enabled =
+                            balancer["group_aware_matching"].as<bool>();
+                    if (balancer["bootstrap_duration_hours"].IsDefined())
+                        parameters_for_experiment.balancer.bootstrap_duration_hours =
+                            balancer["bootstrap_duration_hours"].as<double>();
+                    std::cout << "config.balancer.enabled: " << parameters_for_experiment.balancer.enabled << std::endl;
+                    std::cout << "config.balancer.min_min_enabled: "
+                              << parameters_for_experiment.balancer.min_min_enabled << std::endl;
+                    std::cout << "config.balancer.group_aware_matching_enabled: "
+                              << parameters_for_experiment.balancer.group_aware_matching_enabled << std::endl;
+                    std::cout << "config.balancer.bootstrap_duration_hours: "
+                              << parameters_for_experiment.balancer.bootstrap_duration_hours << std::endl;
+                }
             }
 
             // Deserialize server_side
@@ -507,7 +555,8 @@ int g_total_number_ordinary_clients = (g_total_number_clients - g_total_number_d
         }
         catch (const YAML::Exception &e)
         {
-            std::cout << "Error while parsing YAML: " << e.what() << std::endl;
+            std::cerr << "Error while parsing YAML: " << e.what() << std::endl;
+            std::exit(1);
         }
 
         return config;

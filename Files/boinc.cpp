@@ -24,6 +24,8 @@
 #include "components/types.hpp"
 #include "components/shared.hpp"
 #include "components/scheduler.hpp"
+#include "components/scheduler_balancer_state.hpp"
+#include "components/scheduler_group_aware.hpp"
 #include "tools/execution_state.hpp"
 #include "client_side/data_client.hpp"
 #include "client_side/fetch_work.hpp"
@@ -294,7 +296,48 @@ void print_results()
         printf("  FLOPS in split: \t\t %0.1f and %0.1f and %0.1f end\n\n", (double)project.nvalid_results, (double)project.job_duration, maxst);
 
         printf("  FLOPS average: \t\t%'" PRId64 " GFLOPS\n\n", (int64_t)((double)project.nvalid_results * (double)project.job_duration / maxst / 1000000000.0));
+
+        const BalancerState &bal = project.balancer;
+        printf("  Balancer feedback: \t\t%s\n", g_balancer_feedback_enabled ? "ENABLED" : "DISABLED (baseline)");
+        printf("  Scheduler matching: \t\t%s\n",
+               g_min_min_scheduler_enabled ? "MIN-MIN/MCT" : "FIFO (legacy)");
+        printf("  Group-aware matching: \t\t%s\n",
+               g_group_aware_matching_enabled ? "ENABLED" : "DISABLED");
+        if (g_balancer_feedback_enabled)
+        {
+            printf("  Balancer bootstrap config: \t%0.1f h (effective %0.1f h, cap sim/4=%0.1f h)\n",
+                   bal.bootstrap_duration_config_hours, bal.bootstrap_duration_effective_hours,
+                   static_cast<double>(MAX_SIMULATED_TIME) / 4.0);
+        }
+        printf("  Balancer phase: \t\t%s (steady since %0.1f h)\n",
+               bal.phase == BalancerPhase::BOOTSTRAP ? "BOOTSTRAP" : "STEADY",
+               bal.steady_phase_started_at >= 0 ? bal.steady_phase_started_at / 3600.0 : -1.0);
+        if (g_balancer_feedback_enabled)
+        {
+            auto gate_hours = [](double met_at) { return met_at >= 0 ? met_at / 3600.0 : -1.0; };
+            printf("  Balancer STEADY gates met at: \ttime %0.1f h, cpu %0.1f h, batches %0.1f h, pipeline %0.1f h\n",
+                   gate_hours(bal.steady_time_gate_met_at), gate_hours(bal.steady_cpu_gate_met_at),
+                   gate_hours(bal.steady_batches_gate_met_at), gate_hours(bal.steady_pipeline_gate_met_at));
+            if (bal.phase == BalancerPhase::STEADY && bal.steady_limiting_gate[0] != '\0')
+                printf("  Balancer STEADY limited by: \t%s\n", bal.steady_limiting_gate);
+            else if (bal.phase == BalancerPhase::BOOTSTRAP)
+            {
+                printf("  Balancer STEADY pending: \t\ttime %s, cpu %s, batches %s, pipeline %s\n",
+                       bal.steady_time_gate_met_at >= 0 ? "ok" : "wait",
+                       bal.steady_cpu_gate_met_at >= 0 ? "ok" : "wait",
+                       bal.steady_batches_gate_met_at >= 0 ? "ok" : "wait",
+                       bal.steady_pipeline_gate_met_at >= 0 ? "ok" : "wait");
+            }
+        }
+        printf("  Balancer CPU EMA: \t\t%0.1f sec (%'" PRId64 " samples)\n", bal.ema_cpu_sec, bal.cpu_observations);
+        printf("  Balancer turnaround EMA: \t%0.1f sec (%'" PRId64 " samples)\n", bal.ema_wall_turnaround_sec,
+               bal.result_observations);
+        printf("  Balancer batches sent: \t%'" PRId64 "\n\n", bal.batches_sent);
     }
+
+    printf("\n ####################  Scheduler matching stats  ####################\n\n");
+    scheduler_matching_stats_print();
+    group_aware_stats_print();
 
     fflush(stdout);
 }
@@ -581,6 +624,12 @@ int validator(int argc, char *argv[])
             project.nerror_results++;
         }
         project.nresults_analyzed++;
+
+        if (workunit->times.size() > static_cast<size_t>(reply->result_number))
+        {
+            const double sent_time = workunit->times[reply->result_number];
+            balancer_record_result_turnaround(project, sent_time, sg4::Engine::get_clock());
+        }
 
         // Check workunit
         project.er_mutex->lock();
@@ -1136,6 +1185,12 @@ void init_global_parameters(const parameters::Config &config)
     maxtt = (MAX_SIMULATED_TIME + WARM_UP_TIME) * 3600;
     maxst = (MAX_SIMULATED_TIME) * 3600;
     maxwt = (WARM_UP_TIME) * 3600;
+
+    g_balancer_feedback_enabled = config.experiment_run.balancer.enabled;
+    g_min_min_scheduler_enabled = config.experiment_run.balancer.min_min_enabled;
+    group_aware_matching_init(config);
+    scheduler_matching_stats_reset();
+    group_aware_stats_reset();
 }
 
 void init_measurements(const parameters::Config &config)
@@ -1182,6 +1237,9 @@ int main(int argc, char *argv[])
 
     init_global_parameters(config);
 
+    std::cout << "Scheduler policy: " << (g_min_min_scheduler_enabled ? "MIN-MIN/MCT" : "FIFO (legacy)")
+              << ", balancer feedback: " << (g_balancer_feedback_enabled ? "ENABLED" : "DISABLED")
+              << ", group-aware: " << (g_group_aware_matching_enabled ? "ENABLED" : "DISABLED") << std::endl;
     // set seeds of random generators
     if (config.experiment_run.seed_for_deterministic_run.has_value())
     {
@@ -1307,6 +1365,12 @@ int main(int argc, char *argv[])
         SharedDatabase::_pdatabase[i].ssdmutex = sg4::Mutex::create();
         SharedDatabase::_pdatabase[i].dcmutex = sg4::Mutex::create();
         SharedDatabase::_pdatabase[i].barrier = sg4::Barrier::create(SharedDatabase::_pdatabase[i].nscheduling_servers + SharedDatabase::_pdatabase[i].ndata_client_servers + 4);
+
+        const double bootstrap_config_hours = config.experiment_run.balancer.bootstrap_duration_hours;
+        const double bootstrap_effective_hours =
+            std::min(bootstrap_config_hours, static_cast<double>(MAX_SIMULATED_TIME) / 4.0);
+        balancer_state_init(SharedDatabase::_pdatabase[i].balancer, bootstrap_config_hours,
+                            bootstrap_effective_hours);
     }
 
     for (j = 0; j < g_total_number_scheduling_servers; j++)

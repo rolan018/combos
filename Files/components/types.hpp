@@ -293,6 +293,46 @@ struct client
     double suspended; // Client is suspended (>0) or not (=0)
 };
 
+enum class BalancerPhase
+{
+    BOOTSTRAP,
+    STEADY
+};
+
+/** Online state for scheduling-server batch policy and learned task cost. */
+struct BalancerState
+{
+    BalancerPhase phase = BalancerPhase::BOOTSTRAP;
+    sg4::MutexPtr mutex;
+
+    int64_t batches_sent = 0;
+    int64_t cpu_observations = 0;
+    int64_t result_observations = 0;
+
+    double ema_cpu_sec = 0;
+    double ema_wall_turnaround_sec = 0;
+    double ema_batch_fill_ratio = 0;
+
+    double bootstrap_duration_sec = 6 * 3600;
+    double bootstrap_duration_config_hours = 6.0;
+    double bootstrap_duration_effective_hours = 6.0;
+    int64_t bootstrap_min_cpu_observations = 30;
+    int64_t bootstrap_min_batches = 10;
+    int min_pipeline_results = 5;
+
+    double steady_time_gate_met_at = -1;
+    double steady_cpu_gate_met_at = -1;
+    double steady_batches_gate_met_at = -1;
+    double steady_pipeline_gate_met_at = -1;
+    char steady_limiting_gate[24] = "";
+
+    double ema_alpha = 0.2;
+    double bootstrap_budget_multiplier = 1.5;
+    double bootstrap_max_batch_tasks = 4.0;
+
+    double steady_phase_started_at = -1;
+};
+
 /* Project database */
 struct ProjectDatabaseValue
 {
@@ -427,6 +467,8 @@ struct ProjectDatabaseValue
     sg4::MutexPtr dcmutex;             // Data client mutex
     sg4::BarrierPtr barrier;           // Wait until database is initialized
     char nfinished_scheduling_servers; // Number of finished scheduling servers
+
+    BalancerState balancer;            // Scheduling batch policy state and learned costs
 };
 using ProjectDatabase = std::vector<ProjectDatabaseValue>;
 

@@ -4,6 +4,26 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
+#include <cstring>
+
+static void strip_cr(char *s)
+{
+	if (s == nullptr)
+		return;
+	char *cr = std::strchr(s, '\r');
+	if (cr != nullptr)
+		*cr = '\0';
+}
+
+static const char *client_radical_end(char *n_clients_arg, char *buf, size_t buflen)
+{
+	strip_cr(n_clients_arg);
+	const int n_clients = atoi(n_clients_arg);
+	const int last_host = n_clients > 0 ? n_clients - 1 : 0;
+	snprintf(buf, buflen, "%d", last_host);
+	return buf;
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -23,6 +43,9 @@ int main(int argc, char *argv[])
 		printf("Usage: %s n_clusters n_clients cluster_power cluster_bandwidth cluster_latency n_projects server_pw att_projs lbw llatency\n", argv[0]);
 		exit(1);
 	}
+
+	for (int a = 1; a < argc; a++)
+		strip_cr(argv[a]);
 
 	/* *********** DEPLOYMENT.XML *************/
 	fd = fopen(result_file.c_str(), "w");
@@ -46,7 +69,10 @@ int main(int argc, char *argv[])
 	// Clients
 	for (i = 0; i < n_clusters; i++)
 	{
-		fprintf(fd, "\t<cluster id=\"cluster_%d\" prefix=\"c%d\" suffix=\"\" radical=\"0-%s\"\n\t\tspeed=\"1Gf\" bw=\"%s\" lat=\"%s\" router_id=\"router_cluster%d\"/>\n", i + 1, i + 1, argv[index + 2], argv[index + 1], argv[index], i + 1);
+		char radical_end[32];
+		fprintf(fd, "\t<cluster id=\"cluster_%d\" prefix=\"c%d\" suffix=\"\" radical=\"0-%s\"\n\t\tspeed=\"1Gf\" bw=\"%s\" lat=\"%s\" router_id=\"router_cluster%d\"/>\n",
+				i + 1, i + 1, client_radical_end(argv[index + 2], radical_end, sizeof(radical_end)), argv[index + 1],
+				argv[index], i + 1);
 		index += 3;
 	}
 

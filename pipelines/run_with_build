@@ -1,0 +1,26 @@
+#!/bin/bash
+set -euo pipefail
+
+# Repo root = parent of pipelines/, independent of cwd / machine path
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$REPO_ROOT"
+
+echo "Repo root: $REPO_ROOT"
+echo "Build in '$REPO_ROOT/build'"
+mkdir -p build
+cd build
+
+cmake ..
+cmake --build . --target boinc_sim_cpp -j"$(nproc 2>/dev/null || echo 4)"
+
+cd "$REPO_ROOT"
+
+echo "Run '/generator'"
+./generator
+
+echo "Run '/execute'"
+./execute
+
+echo "Run analyzers"
+export PYTHONPATH="${PYTHONPATH:+$PYTHONPATH:}$REPO_ROOT"
+python3 python/main_analyzer.py

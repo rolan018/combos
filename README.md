@@ -111,35 +111,62 @@ I thought I could finally relax as I no longer saw SegFault, if there wasn't ano
 - When data clients ask for input files from data_client servers, one "thread" is working for each project. If there are several projects, "thread"s won't communicate and just keep asking for files while they have free space in their dedicated memory.
 - redo evaluation in a similar way as in the combos article
 
-# Warning
-If you set up several projects and get in the end
-```bash
-[c1320:Project1:c1320
-:(2033) 7200.000000] ./src/kernel/actor/ActorImpl.cpp:263: [root/CRITICAL] Gasp! This exception may be lost by subsequent calls.
-Backtrace (displayed in actor Project1:c1320
-```
-then congratulations, you stuck with the same problem as me. It appears with specific projects setting,
-estimated flops in particular. If you decrease this parameter for one of the project, it actually can solve
-problem, but I don't know the reason and how to eliminate it. If you have thoughts please share them.
+# Realese 1.0
+* scheduler.cpp 
+    * Общие изменения
+        1. scheduler.cpp стал транспортным слоем scheduling server: получение сообщений, batch dispatch, ответы клиентам. Логика выбора work unit (select_result) вынесена в scheduler_matching.cpp.
+        2. blank_result() — неиспользуемый helper. Создавал пустой AssignedResult для случая «нет работы». В dispatcher уже использовался result = {}, вызов blank_result() был закомментирован.
+        3. Reply/Request -- раздельные dispatch_*
+            1. dispatch_client_replies(project, replies) : batch processing — несколько REPLY обрабатываются в одной итерации dispatcher.
+            2. dispatch_work_requests(project_number, project, requests, sscomm) : один вызов scheduling_assign_work_batch() для всех REQUEST в batch (нужно для Min-Min)
+            3. scheduling_server_dispatcher() — главное изменение drain очереди
+                wait(queue not empty)
+                    - DRAIN ALL msgs → pending_replies[], pending_requests[]
+                    - compute_server()
+                    - dispatch_client_replies(all REPLYs)
+                    - dispatch_work_requests(all REQUESTs)  // one batch matching call
+                    - time_busy +=
+                Раньше Dispatcher просыпается, когда в очереди есть сообщения, но берёт только одно. Теперь после wake-up dispatcher вытаскивает всё, что в очереди на этот момент.
+    * select_result(project_number, req) -> scheduler_matching.cpp (несколько политик)
+        Раньше (select_result) — пошагово
+        1. Итерация по current_results в порядке очереди (FIFO).
+        2. Пропуск, если input files не в группе клиента (the_same_client_group).
+        3. Пропуск duplicate workunit в том же bag (unique_workunits).
+        4. Берёт первый подходящий (не min-cost).
+        5. cost = balancer_per_result_work_cost(); stop если sum_work + cost >= budget.
+        6. Удаляет из pipeline, создаёт task, добавляет в bag.
+        7. Повтор до stop или пустой очереди.
 
-A workaround for this problem is to find the line with "Gasp! This exception may be lost by subsequent calls." in your installation of simgrid, comment it and rebuild the library. In the future more normal workaround can be implemented when we first print results and then finish the simulation.
+        Сейчас ветки политик:
 
-Another problem is described in [this issue](https://github.com/simgrid/simgrid/issues/394). It affects the simulation significantly and isn't fixed yet.
+        1. cheduling_select_results_fifo `g_min_min_scheduler_enabled == false` legacy FIFO; при group-aware — lowest cost вместо head
+        2. scheduling_select_results_mct `Min-Min, 1 клиент` каждый следующий result = min cost (MCT)
+        3. scheduling_min_min_batch `Min-Min, N клиентов` глобально min completion time across (client, result)
+        4. scheduling_assign_work_batch `entry point` Min-Min path или FIFO per client
 
-# Explanations of some parts:
-1. task flops:
-why do we have 
+        Практическая сводка. Разделение — dispatcher (scheduler.cpp) vs политики (scheduler_matching.cpp).
+        1. Batch dispatch — несколько REQUEST обрабатываются вместе (нужно для Min-Min).
+        2. Расширенный cost — tier mismatch penalty (scheduler_group_aware).
+        3. Новые политики — MCT и Min-Min поверх того же pipeline/budget.
+        4. Feedback loop — balancer_record_batch для bootstrap balancer.
+        5. Ближайший аналог старого поведения: scheduling_select_results_fifo при g_min_min_scheduler_enabled = false и g_group_aware_matching_enabled = false — логика совпадает с select_result (FIFO + group check + batch budget), плюс вызов balancer_record_batch на выходе (no-op если balancer disabled).
 
-```task->duration = project.job_duration * ((double)req->group_power / req->power); (1)```
+* scheduler_group_aware.cpp — tier-aware placement. Server-side soft steering: short job → fast tier, long job → slow tier.
+* scheduler_balancer_state.cpp — bootstrap balancer (инфраструктура). Адаптивная фаза BOOTSTRAP → STEADY с online-оценками.
+* scheduler_batch_cost.cpp — cost function (Bridge)
 
-and
+* boinc.cpp
+    * Additional parameters for balancers
+    * Add function for calculate turnarounds from balancers
 
-```(task.msg_task->get_remaining() * client->factor) / power; (2)```
+* parameters_struct_from_yaml.hpp — конфигурация политик
+    * BalancerConfig:
+        ```
+        balancer:
+            enabled: false
+            min_min_enabled: false
+            group_aware_matching_enabled: true
+            bootstrap_duration_hours: 6.0
+        ```
 
-In platform.xml we set up a clients' cluster where hosts have speed of 1Gf. This speed is used for execution tasks 
-via SimGrid. Instead of setting different speed to hosts, we adjust amount of computation (1). When we need to calculate
-time left for the task, we eliminate this affect by multiplying by client->factor as in (2).
-
-## Epilog
-Scheme that helps me to understand what's going on:
-[draw.io file](https://drive.google.com/file/d/1AiNDxQ6wiof9eOykej56L1AG8mgznK_Z/view?usp=sharing)
+* execute_task.cpp  Передача CPU-время завершённого task в bootstrap balancer.

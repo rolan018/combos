@@ -1,5 +1,7 @@
 #include "scheduler_batch_cost.hpp"
 
+#include "scheduler_group_aware.hpp"
+
 #include <algorithm>
 
 namespace {
@@ -40,7 +42,7 @@ double balancer_per_result_work_cost(const ProjectDatabaseValue &project, reques
         static_cast<double>(std::max(0, candidate->ninput_files)) * static_cast<double>(project.input_file_size);
     const double bw = std::max(1.0, static_cast<double>(project.disk_bw));
     const double input_seconds = bytes / bw;
-    return cpu_seconds + input_seconds;
+    return cpu_seconds + input_seconds + group_aware_mismatch_penalty(project, req);
 }
 
 double balancer_request_budget(const ProjectDatabaseValue &project, request_t req)

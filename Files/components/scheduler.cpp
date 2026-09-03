@@ -4,10 +4,11 @@
 #include <simgrid/s4u.hpp>
 #include <math.h>
 #include <inttypes.h>
+#include <vector>
 
 #include "types.hpp"
 #include "shared.hpp"
-#include "scheduler_batch_cost.hpp"
+#include "scheduler_matching.hpp"
 
 /**
  * @brief
@@ -20,114 +21,62 @@
 
 namespace sg4 = simgrid::s4u;
 
-/*
- *	Blank result
- */
-AssignedResult *blank_result()
+namespace {
+
+void dispatch_client_replies(ProjectDatabaseValue &project, const std::vector<SchedulingServerMessage *> &replies)
 {
-    AssignedResult *result = new AssignedResult();
-    result->workunit = NULL;  // Associated workunit
-    result->ninput_files = 0; // Number of input files
-    // result->input_files.clear(); // Input files names (URLs)
-    result->number_tasks = 0; // Number of tasks (usually one)
-    // result->tasks;            // Tasks
-    return result;
-}
-
-/*
- *	Select result from database
- */
-std::vector<AssignedResult *> select_result(int project_number, request_t req)
-{
-
-    ProjectDatabaseValue &project = SharedDatabase::_pdatabase[project_number];
-
-    // параметры нужные для будующей модификации балансировщика
-    // client_group &group_info = SharedDatabase::_group_info[project_number];
-    // int client_group = get_client_group(req->host_name);
-    
-    std::vector<AssignedResult *> bag_of_result;
-    double sum_work = 0;
-
-    std::set<std::string> unique_workunits;
-    std::list<AssignedResult *>::iterator current_results_it = project.current_results.begin();
-
-    while (true)
+    for (auto *msg : replies)
     {
-
-        // Get result
-        AssignedResult *result = nullptr;
-        for (; current_results_it != project.current_results.end(); ++current_results_it)
-        {
-            // several data clients can download this file. We check if client has one of
-            // them in its group
-            bool is_file_accessible_in_group = false;
-            for (auto input_file_holder : (*current_results_it)->workunit->input_files)
-            {
-                if (the_same_client_group(input_file_holder, req->host_name))
-                {
-                    is_file_accessible_in_group = true;
-                    break;
-                }
-            }
-            if (!is_file_accessible_in_group)
-                continue;
-            if (unique_workunits.count((*current_results_it)->workunit->number) == 0)
-            {
-                break;
-            }
-        }
-        if (current_results_it == project.current_results.end())
-        {
-            project.wg_full->notify_all();
-            break;
-        }
-
-        const double cost = balancer_per_result_work_cost(project, req, *current_results_it);
-        if (balancer_should_stop_batch(sum_work, cost, project, req))
-            break;
-
-        result = *current_results_it;
-        auto next_it = current_results_it;
-        next_it++;
-        project.current_results.erase(current_results_it);
-        current_results_it = next_it;
-
-        if (result == nullptr)
-        {
-            project.wg_full->notify_all();
-            break;
-        }
-
-        // Signal work generator if number of current results is 0
-        project.ncurrent_results--;
-        if (project.ncurrent_results == 0)
-        {
-            project.wg_full->notify_all();
-        }
-
-        sum_work += cost;
-
-        // Create task
-        TaskT *task = new TaskT();
-        task->workunit = result->workunit->number;
-        task->name = std::string(bprintf("%" PRId32, result->workunit->nsent_results++));
-        task->duration = project.job_duration * ((double)req->group_power / req->power);
-        task->deadline = project.delay_bound;
-        task->sent_time = sg4::Engine::get_clock();
-        result->corresponding_tasks = task;
-        // set sent time instead of creation time here
-        result->workunit->times[result->number] = task->sent_time;
-
-        unique_workunits.insert(task->workunit);
-        bag_of_result.push_back(result);
-
-        project.ssdmutex->lock();
-        project.nresults_sent++;
-        project.ssdmutex->unlock();
+        project.v_mutex->lock();
+        project.current_validations.push(reinterpret_cast<reply_t>(msg->content));
+        project.ncurrent_validations++;
+        project.v_empty->notify_all();
+        project.v_mutex->unlock();
+        delete msg;
     }
-    return bag_of_result;
 }
+
+void dispatch_work_requests(int project_number, ProjectDatabaseValue &project,
+                            const std::vector<SchedulingServerMessage *> &requests, sg4::ActivitySet &sscomm)
+{
+    if (requests.empty())
+        return;
+
+    std::vector<request_t> reqs;
+    reqs.reserve(requests.size());
+    for (auto *msg : requests)
+        reqs.push_back(reinterpret_cast<request_t>(msg->content));
+
+    std::vector<std::vector<AssignedResult *>> assignments;
+    project.r_mutex->lock();
+    if (project.ncurrent_results == 0)
+        assignments.assign(requests.size(), {});
+    else
+        assignments = scheduling_assign_work_batch(project_number, reqs);
+    project.r_mutex->unlock();
+
+    for (size_t i = 0; i < requests.size(); ++i)
+    {
+        auto *msg = requests[i];
+        auto *req = reinterpret_cast<request_t>(msg->content);
+
+        ResultBag *msg_pack = new ResultBag{.results = assignments[i]};
+        int msg_sz = 0;
+        for (auto &task : assignments[i])
+            msg_sz += KB * task->ninput_files;
+
+        auto ans_mailbox = sg4::Mailbox::by_name(req->answer_mailbox);
+        auto comm = ans_mailbox->put_async(msg_pack, msg_sz);
+
+        delete_completed_communications(sscomm);
+        sscomm.push(comm);
+
+        delete req;
+        delete msg;
+    }
+}
+
+} // namespace
 
 /*
  *	Scheduling server requests function
@@ -210,13 +159,11 @@ int scheduling_server_requests(int argc, char *argv[])
  */
 int scheduling_server_dispatcher(int argc, char *argv[])
 {
-    dsmessage_t work = nullptr;           // Termination message
-    std::vector<AssignedResult *> result; // Data server answer
-    simgrid::s4u::CommPtr comm = nullptr; // Asynchronous communication
-    sserver_t sserver_info = nullptr;     // Scheduling server info
-    int32_t i, project_number;            // Index, project number
-    int32_t scheduling_server_number;     // Scheduling_server_number
-    double t0, t1;                        // Time measure
+    dsmessage_t work = nullptr;       // Termination message
+    sserver_t sserver_info = nullptr; // Scheduling server info
+    int32_t i, project_number;        // Index, project number
+    int32_t scheduling_server_number; // Scheduling_server_number
+    double t0, t1;                    // Time measure
 
     sg4::ActivitySet _sscomm; // Asynchro communications storage (scheduling server with client)
 
@@ -237,106 +184,41 @@ int scheduling_server_dispatcher(int argc, char *argv[])
 
     while (1)
     {
-        std::unique_lock lock(*sserver_info->mutex);
+        std::vector<SchedulingServerMessage *> pending_replies;
+        std::vector<SchedulingServerMessage *> pending_requests;
 
-        // Wait until queue is not empty
-        while ((sserver_info->Nqueue == 0) && (sserver_info->EmptyQueue == 0))
         {
-            sserver_info->cond->wait(lock);
+            std::unique_lock lock(*sserver_info->mutex);
+
+            while ((sserver_info->Nqueue == 0) && (sserver_info->EmptyQueue == 0))
+                sserver_info->cond->wait(lock);
+
+            if ((sserver_info->EmptyQueue == 1) && sserver_info->Nqueue == 0)
+                break;
+
+            t0 = sg4::Engine::get_clock();
+
+            while (sserver_info->Nqueue > 0)
+            {
+                auto *msg = sserver_info->client_requests.front();
+                sserver_info->client_requests.pop();
+                sserver_info->Nqueue--;
+
+                if (msg->type == REPLY)
+                    pending_replies.push_back(msg);
+                else
+                    pending_requests.push_back(msg);
+            }
         }
 
-        // Exit the loop when boinc server indicates it
-        if ((sserver_info->EmptyQueue == 1) && sserver_info->Nqueue == 0)
-        {
-            break;
-        }
-
-        // Iteration start time
-        t0 = sg4::Engine::get_clock();
-
-        // Simulate server computation
         compute_server(36000000);
 
-        // Pop client message
-        auto msg = sserver_info->client_requests.front();
-        sserver_info->client_requests.pop();
-        sserver_info->Nqueue--;
-        lock.unlock();
+        dispatch_client_replies(project, pending_replies);
+        dispatch_work_requests(project_number, project, pending_requests, _sscomm);
 
-        // Check if message is an answer with the computation results
-        if (msg->type == REPLY)
-        {
-            project.v_mutex->lock();
-
-            // Call validator
-            project.current_validations.push(reinterpret_cast<reply_t>(msg->content));
-            project.ncurrent_validations++;
-
-            project.v_empty->notify_all();
-            project.v_mutex->unlock();
-        }
-        // Message is an address request
-        else
-        {
-            // Consumer
-            project.r_mutex->lock();
-
-            if (project.ncurrent_results == 0)
-            {
-                // NO WORKUNITS
-                // result = blank_result();
-                result = {};
-            }
-            else
-            {
-                // CONSUME
-                result = select_result(project_number, (request_t)msg->content);
-            }
-
-            project.r_mutex->unlock();
-
-            // Answer the client
-            auto caller_reply_mailbox = ((request_t)msg->content)->answer_mailbox;
-            auto ans_mailbox = sg4::Mailbox::by_name(caller_reply_mailbox);
-
-            ResultBag *msg_pack = new ResultBag{.results = result};
-            int msg_sz = 0;
-            for (auto &task : result)
-            {
-                msg_sz += KB * task->ninput_files;
-            }
-
-            comm = ans_mailbox->put_async(msg_pack, msg_sz);
-
-            // Store the asynchronous communication created in the dictionary
-
-            delete_completed_communications(_sscomm);
-            _sscomm.push(comm);
-
-            switch (msg->datatype)
-            {
-            case ssmessage_content::SReplyT:
-                delete (reply_t)msg->content;
-                break;
-            case ssmessage_content::SRequestT:
-                delete (request_t)msg->content;
-                break;
-            default:
-                break;
-            }
-        }
-
-        // Iteration end time
         t1 = sg4::Engine::get_clock();
-
-        // Accumulate total time server is busy
         if (t0 < maxtt)
             sserver_info->time_busy += (t1 - t0);
-
-        // Free
-        delete msg;
-        msg = nullptr;
-        result.clear();
     }
 
     // Wait until all scheduling servers finish

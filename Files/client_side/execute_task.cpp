@@ -25,6 +25,7 @@
 
 #include "../components/types.hpp"
 #include "../components/shared.hpp"
+#include "../components/scheduler_balancer_state.hpp"
 #include "../tools/execution_state.hpp"
 #include "../rand.hpp"
 #include "../tools/thermometer.hpp"
@@ -229,6 +230,8 @@ int client_execute_tasks(ProjectInstanceOnClient *proj)
             es::Switcher::switch_to(proj->client->name, es::State::Idle);
             task->time_spent_on_execution += sg4::Engine::get_clock() - task->last_start_time;
             g_measure_task_duration_per_project.at(proj->name)->add_to_series(task->time_spent_on_execution);
+            balancer_record_cpu_sample(SharedDatabase::_pdatabase[(int)proj->number],
+                                       task->time_spent_on_execution);
 
             number = (int32_t)atoi(task->name.c_str());
             proj->number_executed_task.push(task->result_number);
